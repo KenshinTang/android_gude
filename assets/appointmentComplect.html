@@ -1,0 +1,223 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>预约完成</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .statu {
+            margin: 50px auto 30px auto;
+        }
+
+        .button {
+            border-radius: 23px;
+            line-height: 45px;
+        }
+
+        .record {
+            margin: 40px 30px 20px 30px;
+            border: 1px solid #E5E5E5;
+        }
+
+        .home {
+            margin: 0px 30px;
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="androidback()"></div>
+            <div class="navTitle">预约成功</div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="bg_white">
+
+        <div class="detail"></div>
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/art-template.js"></script>
+
+    <script>
+        var oid = Comm.query('oid'),
+            type = Comm.query('type'),
+            PageM = {
+                doctor: {},
+                cliInfo: {},
+                orderInfo: {},
+            };
+
+        function pageload() {
+            if (oid) {
+                getOrderDetail(oid);
+            }
+
+            if (type == 'scan') {
+                Comm.enableGesterPop();
+            }
+        }
+
+
+        function getOrderDetail(orderid) {
+            var params = {
+                docappointmentid: orderid
+            }
+            Comm.loading(1);
+            SLNetwork('get', '/api/appointment/info', params, function (data) {
+                if (data.code == 1) {
+                    PageM.orderInfo = data.data;
+                    getClinicDetail();
+                } else {
+                    Comm.loading();
+                    Comm.message(data.msg);
+                }
+            });
+        }
+
+
+        function androidback() {
+            Comm.gotop();
+        }
+
+
+        //获取诊所详情
+        function getClinicDetail() {
+            var params = {
+                clinicid: PageM.orderInfo.clinicid,
+            };
+            SLNetwork('get', '/api/clinic/info', params, function (a) {
+                if (a.code == 1) {
+                    a.data = a.data || {
+                        info: {}
+                    };
+                    PageM.cliInfo = a.data.info || {};
+                    getDoctorDetail();
+                } else {
+                    Comm.loading();
+                    Comm.message(a.msg);
+                }
+            });
+        }
+
+
+        //获取医生信息
+        function getDoctorDetail() {
+            var params = {
+                doctorid: PageM.orderInfo.doctorid
+            }
+            SLNetwork('get', '/api/doctor/info', params, function (data) {
+                Comm.loading();
+                if (data.code == 1) {
+                    PageM.doctor = data.data || {};
+                    setPageData();
+                } else {
+                    Comm.message(data.msg);
+                    setTimeout(function () {
+                        Comm.gotop('tabPage1.html');
+                    }, 600)
+                }
+            });
+        }
+
+        function setPageData() {
+            var html = template('tp_id_detail', PageM);
+            $('.detail').html(html);
+        }
+    </script>
+
+
+    <script type="text/html" id="tp_id_detail">
+        <div class="flex_center statu">
+            <img src="img/success.png" width="25" height="25" class="patient mr10">
+            <div class="f18">预约成功</div>
+        </div>
+
+
+        <div class="bg_white m15 br5 ohide shadow">
+            <div class="flex_between bg_trans_L_R col_white p15 baseWH">
+                <div>挂号订单：{{orderInfo.appointmentsn||''}}</div>
+                <div>{{formatDate(orderInfo.subdate,'Y-m-d')}}</div>
+            </div>
+
+            <div class="p15">
+                <div class="flex_between pt15 pb15">
+
+                    <div class="">
+                        <div class="bold f16 baseWH textHide" style="width:200px;">{{cliInfo.clinicname||''}}</div>
+                        <div class="bold f16 baseWH mart10 textHide" style="width:200px;">{{doctor.docname||''}}</div>
+                    </div>
+
+                    <img src="{{OSS(doctor.dochead,'s')}}" width="45" height="45" class="halfBr">
+
+                </div>
+
+
+                <div class="marb25">
+                    <div class="baseWH">
+                        预约时间：{{orderInfo.targetdate||''}}（{{getWeekD(orderInfo.targetdate)}}）{{getAPm(orderInfo.targettype)}}
+                    </div>
+                    <div class="baseWH mt10 mb10 flex flexItem_start">
+                        <div>诊所地址：</div>
+                        <div class="flex1">{{orderInfo.cliniclocate||''}}</div>
+                    </div>
+
+                    <div class="baseWH">挂号费用：¥<span class="">{{orderInfo.price||''}}</span></div>
+
+                    <div class="baseWH mt10 mb10">就诊病人：<span class="col_theme">{{orderInfo.cuspatientname||''}}</span></div>
+
+                    <div class="baseWH">就诊序号：<span class="col_theme">【{{orderInfo.daynum||''}}】</span></div>
+
+
+                </div>
+
+
+                <div class="col_sub">
+                    请于{{formatDate(orderInfo.targetdate,'Y年m月d日')}} {{getAPm(orderInfo.targettype)}}
+                    {{if orderInfo.targettype == 1}}{{orderInfo.downworktime||''}}{{else}}{{orderInfo.upworktime||''}}{{/if}}
+                    到{{orderInfo.clinicname||''}}取号，
+                    过期预约作废，为避免因违约进入平台黑名单，请及时到诊
+                    所取号。
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div class="flex_center lh50 bg_white record button" onclick="Comm.gotop('tabPage3.html')">
+            <img src="img/record.png" width="17" height="20">
+            <div class="f17 margin_h">预约记录</div>
+        </div>
+
+        <div class="flex_center lh50 bg_trans button col_white home" onclick="androidback();">
+            <img src="img/home_w.png" width="17" height="20">
+            <div class="f17 margin_h">返回首页</div>
+        </div>
+    </script>
+
+
+</body>
+
+</html>

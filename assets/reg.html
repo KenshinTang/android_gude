@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+    <link rel="stylesheet" href="css/g.css" />
+    <link rel="stylesheet" href="css/comm.css" />
+    <style>
+        section div input::-webkit-input-placeholder {
+            line-height: 21px;
+            color: #C7C7CD;
+        }
+
+        .cellDiv {
+            background-color: #fff;
+            border-bottom: 1px solid #ededf5;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .cellDiv input {
+            height: 50px;
+            box-sizing: border-box;
+            color: #111;
+            padding-left: 30px;
+            background-repeat: no-repeat;
+            background-size: auto 20px;
+            background-position: left center;
+        }
+
+        .cellDiv i {
+            position: absolute;
+            right: 10px;
+            top: 20px;
+            padding: 0 5px;
+            width: 30px;
+        }
+
+        .ph i>img,
+        .pw i>img {
+            vertical-align: middle;
+        }
+
+        .code-btn {
+            padding: 0px 10px;
+            height: 30px;
+            line-height: 30px;
+            font-size: 13px;
+            margin-top: 10px;
+            float: right;
+            border-radius: 15px;
+        }
+
+        #rid {
+            height: 30px;
+        }
+
+        #rid span {
+            vertical-align: top;
+        }
+
+        .leftText {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            bottom: 0px;
+            line-height: 50px;
+            font-size: 17px;
+        }
+
+        .sign-btn {
+            height: 40px;
+            line-height: 40px;
+            background-color: #FF6161;
+            border-radius: 20px;
+            color: white;
+            margin: 30px 20px;
+        }
+
+        .lIcon.tel {
+            background-image: url("img/tel.png");
+        }
+
+        .lIcon.code {
+            border-bottom: 0px;
+            background-image: url("img/code.png");
+        }
+
+        .lIcon.psw {
+            background-image: url("img/lock.png");
+        }
+
+        .lIcon.invite {
+            background-image: url("img/invite.png");
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navBar">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+        </div>
+    </header>
+    <section id=''>
+
+        <div class="f24 bold mart30 marb30 marl25">注册</div>
+
+        <div class="paddl20 paddr20">
+
+            <div class="ph cellDiv">
+                <div class="leftText lIcon tel"></div>
+                <input placeholder="请输入11位手机号" class="f16" style="width: 100%;" id="phone" name="phone" data-reg='m'
+                    type="tel" maxlength="11" value="" />
+            </div>
+
+            <div class="cellDiv code">
+                <div class="leftText lIcon code"></div>
+                <input placeholder="请输入验证码" type="tel" class="f16" style="width: 60%;" name="vcode" data-reg='c'
+                    id="code1" maxlength="6" value="" />
+                <button id="yzm" type="button" onclick="app.timeCountDown(this,$('#phone').val(),1);"
+                    class="bg_trans code-btn col_white f12">验证码</button>
+                <!--bg_trans-->
+            </div>
+
+            <div class="cellDiv pw">
+                <div class="leftText lIcon psw"></div>
+                <input placeholder="请输入6位以上的密码" class="f16 mainW" type="password" name="password" data-reg='p'
+                    maxlength="20" value="" />
+            </div>
+
+            <!--<div class="cellDiv">-->
+            <!--<div class="leftText lIcon invite"></div>-->
+            <!--<input placeholder="请输入推荐码(选填)" class="f16" type="text" name="recommendsn" maxlength="20" value=""/>-->
+            <!--</div>-->
+
+        </div>
+
+
+        <div class="mart20 tcenter center sign-btn bg_trans" onclick="reg()">立即注册</div>
+
+
+        <div class="f12 mart20 marl20 center" id='rid'>
+            <img class="readme noreadme" src="img/agree_n.png" width="12" onclick="toRead($('#rid'),event)" />
+            <span>
+                <i> 已阅读并同意</i>
+                <i onclick="goRead();">《服务协议》</i>
+            </span>
+        </div>
+
+    </section>
+</body>
+
+
+
+
+<style>
+
+
+
+</style>
+
+
+
+<script type="text/javascript" src="js/z.js"></script>
+<script type="text/javascript" src="js/g.js"></script>
+<script type="text/javascript" src="js/comm.js"></script>
+<script type="text/javascript" src="js/api.js"></script>
+
+<script>
+    function pageload() {
+        if (Comm.db('regread')) toRead(false);
+    }
+
+
+
+    function toRead(t, e) {
+
+        if (!t) {
+            t = $('.readme')[0];
+            $(t).attr('src', "img/agree_y.png");
+            $(t).removeClass('noreadme');
+        } else {
+            t = t.find('img')[0];
+            if (e)
+                var e = e.event || window.event;
+            if ($(t).hasClass('noreadme')) {
+                $(t).attr('src', "img/agree_y.png");
+                $(t).removeClass('noreadme')
+                Comm.db('regread', 1);
+            } else {
+                $(t).attr('src', "img/agree_n.png");
+                $(t).addClass('noreadme');
+                Comm.db('regread', null);
+            }
+            if (e) event.stopPropagation();
+        }
+
+    }
+
+    function goRead() {
+        Comm.go('artical.html?aid=2'); //服务协议
+    }
+
+
+
+    //注册
+    function reg() {
+        var opt = Check.submit('POST');
+
+        if ($('.readme').hasClass('noreadme')) {
+            return Comm.message('同意服务协议才可操作');
+        }
+        if (opt) { //1 注册 2 忘记 3修改手机 5手机验证
+            Comm.loading('正在注册...');
+
+
+            AJAX.POST('/api/customer/registe', opt, function (a) { //注册
+                Comm.loading();
+                if (a.code == 1) {
+                    Comm.message('注册成功!');
+                    AJAX.POST('/api/customer/login', opt, function (b) {
+                        if (b.code == 1) {
+                            AJAX.setTag(b.data.token);
+                            b.data.phone = opt.phone;
+                            regPush();
+                            app.saveUserinfo(b.data, function () {
+                                Comm.gotop('tabPage1.html');
+                            });
+                        } else {
+                            Comm.message(b.msg);
+                        }
+                    })
+                } else {
+                    Comm.message(a.msg);
+                }
+            });
+
+
+        }
+    }
+
+
+
+
+    // //获取验证码
+    // function getCode(t) {
+    //     var o = {};
+    //     o.type = 1; //1：注册 2：找回密码  5：手机验证
+    //     o.phone = $('#phone').val();
+    //     AJAX.POST('/common/sms/send', o, function (a) {
+    //
+    //     });
+    // }
+
+
+
+
+    // function yzm(a) {
+    //     var m = /^1\d{10}$/;
+    //     var o = $('#phone').val().search(m);
+    //     if (o == 0) {
+    //         var time = 60;
+    //         settime();
+    //         getCode(a, 1);
+    //         Comm.message('验证码已发送!');
+    //
+    //         function settime() {
+    //             if (time == 0) {
+    //                 $("#yzm").addClass("bg_trans");
+    //                 $("#yzm").addClass("col_white");
+    //                 $("#yzm").text("验证码");
+    //                 $("#yzm").css("background-color", "#FFFFFF");
+    //                 $("#yzm").css("border-color", "#E23339");
+    //                 $("#yzm").css("color", "#E23339");
+    //                 $("#yzm").removeAttr("disabled");
+    //                 return;
+    //             } else {
+    //                 $("#yzm").removeClass("bg_trans");
+    //                 $("#yzm").removeClass("col_white");
+    //                 $("#yzm").text(time + "S重新发送");
+    //                 $("#yzm").css("background-color", "#FFFFFF");
+    //                 $("#yzm").css("border-color", "#FFFFFF");
+    //                 $("#yzm").css("color", "#E4161D");
+    //                 $("#yzm").attr("disabled", "disabled");
+    //                 time--;
+    //             }
+    //             setTimeout(function () {
+    //                 settime()
+    //             }, 1000)
+    //         }
+    //     } else {
+    //         Comm.message('手机号格式错误!');
+    //     }
+    // }
+</script>
+
+</html>

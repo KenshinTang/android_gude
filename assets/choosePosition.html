@@ -1,0 +1,140 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>地址选择</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .name {
+            line-height: 40px;
+        }
+
+        .bg_province{
+            /*background-color: white;*/
+            padding-left: 20px;
+        }
+        .bg_city{
+            background-color: #F6F6F6;
+            padding-left: 50px;
+        }
+        .bg_area{
+            /*background-color: yellow;*/
+            padding-left: 80px;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle">地址选择</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+    <div class="positionCt scroll-y"></div>
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/area.js"></script>
+<script src="js/art-template.js"></script>
+
+
+<script>
+
+    var tempAid = '';
+
+    Area.init();
+
+
+    function pageload() {
+        var arr = Area._d;
+        var model = {
+            list: arr,
+            type: 1,
+        }
+
+        var html = template('tp_id_cell', arr);
+
+        $('.positionCt').html(html);
+    }
+
+
+    function showChildren(aid) {
+        event.stopPropagation();
+        tempAid = '';
+
+        if ($('#'+aid).html()){
+            $('#'+aid).html('');
+            return;
+        }
+
+        var aModel = Area.getArea(aid);
+        var arr = aModel.children||[];
+
+
+        $('.child'+aModel.l).html('');
+
+
+
+        if (arr.length){
+            var html = template('tp_id_cell', arr);
+            $('#'+aid).html(html);
+        } else {
+            tempAid = aid;
+            Comm.db('showArea',aModel);
+            setTimeout(function () {
+                Comm.close();
+            },100);
+
+        }
+
+        console.log(tempAid);
+    }
+
+
+</script>
+
+
+<script type="text/html" id="tp_id_cell">
+
+    {{each $data model i}}
+    <div class="section" onclick="showChildren('{{model.i}}',this);">
+        {{if model.l == 1}}
+        <div class="name bg_province">{{model.s}}</div>
+        {{else if model.l == 2}}
+        <div class="name bg_city">{{model.s}}</div>
+        {{else if model.l == 3}}
+        <div class="name bg_area">{{model.s}}</div>
+        {{/if}}
+        <div class="child{{model.l}}" id="{{model.i}}"></div>
+    </div>
+    {{/each}}
+
+</script>
+
+</body>
+
+</html>

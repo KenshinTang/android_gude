@@ -1,0 +1,324 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>确认预约</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        body {
+            background: url("img/bg_sure.png") no-repeat top center;
+            background-size: 100% 170px;
+        }
+
+        .navBackIcon {
+            background-image: url("stIconfile/back_w.png");
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+        .appointMentInfo {
+            margin: 10px 15px;
+            padding: 0px 15px;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        .cell {
+            padding-top: 15px;
+            padding-bottom: 20px;
+        }
+
+        .lineV {
+            width: 2px;
+            height: 13px;
+            border-radius: 1px;
+            background-color: #EF5F1E;
+        }
+
+        .cCt {
+            margin-left: 12px;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<!--******************************************************************************-->
+
+<header>
+    <div class="navBar bg_clear">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle col_white">确认预约</div>
+    </div>
+</header>
+
+
+<section>
+
+    <div class="appointMentInfo shadow">
+
+        <!--预约信息-->
+        <div class="cell">
+
+            <div class="cHeader flex_start">
+                <div class="lineV mr10"></div>
+                <div class="hTitle f16">预约信息</div>
+            </div>
+
+            <div class="mart20 cCt">
+                <div class="f12 item_cli">诊所：</div>
+                <div class="f12 item_doc">医生：</div>
+                <div class="f12 item_time">时间：</div>
+            </div>
+
+
+        </div>
+
+        <div class="cell indicator" onclick="Comm.go('patientList.html?type=choose')">
+
+            <div class="cHeader flex_start">
+                <div class="lineV mr10"></div>
+                <div class="hTitle f16">就诊人信息</div>
+                <img src="img/patient.png" width="20" height="20" class="patient ml10">
+            </div>
+
+
+            <div class="mart20 marb20 cCt">
+                <div class="f12 item_name">姓名：</div>
+                <dif class="f12 item_tel">联系方式：</dif>
+            </div>
+
+        </div>
+
+
+        <div class="cell">
+
+            <div class="cHeader flex_start">
+                <div class="lineV mr10"></div>
+                <div class="hTitle f16">温馨提示</div>
+            </div>
+
+            <div class="mart20 marb20 cCt">
+                <div class="f12">1.挂号金额于门诊处支付</div>
+                <dif class="f12">2.若超过<span class="limitTimes">0</span>次预约未前往，将被列入黑名单</dif>
+            </div>
+
+
+            <div class="flex flexItem_reverse_R">
+                <div class="baseWH item_price"></div>
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="f12 mart20 marl20" id='rid'>
+        <img class="readme noreadme" src="img/agree_n.png" width="12" onclick="toRead($('#rid'),event)" />
+        <span>
+                <i> 我已阅读并同意</i>
+                <i onclick="Comm.go('artical.html?aid=6');">《服务协议》</i>
+            </span>
+    </div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+    <div class="bg_lgray m10 col_white center lh50 f17 submit" onclick="submitOrder(this);">确认预约</div>
+
+    <!--<div class="bg_trans m10 col_white center lh50 f17 submit" onclick="Comm.go('appointmentFail.html');">预约失败</div>-->
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+
+<script>
+
+    var skip = Comm.query('skip');
+
+    var PageM = {
+        orderModel: Comm.db('orderM'),
+        doctor: {},
+        cliInfo: {},
+        cuspatient: Comm.db('cuspatM'),
+    }
+
+
+    function pageload() {
+        if (PageM.orderModel) {
+            getClinicDetail();
+        }
+    }
+
+    function pageresume() {
+        PageM.cuspatient = Comm.db('cuspatM');
+        setPageData();
+    }
+
+
+    //获取诊所详情
+    function getClinicDetail() {
+        var params = {
+            clinicid: PageM.orderModel.clinicid,
+        };
+        SLNetwork('get', '/api/clinic/info', params, function (a) {
+            Comm.loading();
+            if (a.code == 1) {
+                a.data = a.data || {info: {}};
+                PageM.cliInfo = a.data.info || {};
+                getDoctorDetail();
+            } else {
+                Comm.message(a.msg);
+            }
+        });
+
+
+        app.getSys('APPOINT_LIMIT', function (data) {
+
+            var configs = data.data || [];
+            if (configs.length) {
+                var times = configs[0].sysValue;
+                $('.limitTimes').text(times);
+            }
+
+        })
+
+
+    }
+
+
+    //获取医生信息
+    function getDoctorDetail() {
+        var params = {
+            doctorid: PageM.orderModel.doctorid
+        }
+        Comm.loading(1);
+        SLNetwork('get', '/api/doctor/info', params, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                PageM.doctor = data.data || {};
+                setPageData();
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+    }
+
+
+    function setPageData() {
+
+        var doct = PageM.doctor || {};
+        var clin = PageM.cliInfo || {};
+        var orderM = PageM.orderModel || {};
+        var cuspat = PageM.cuspatient || {};
+
+        $('.item_cli').text('诊所：' + (clin.clinicname || ''));
+        $('.item_doc').text('医生：' + (doct.docname || ''));
+        $('.item_time').text('时间：' + (orderM.fullTimeStr || ''));
+
+        $('.item_name').text('姓名：' + (cuspat.paname || ''));
+        $('.item_tel').text('联系方式：' + (cuspat.paphone || ''));
+        $('.item_price').text('挂号费用：¥'+(doct.appointprice || '0'));
+
+
+
+        if (cuspat && cuspat.cuspatientid) {
+            orderM.cuspatientid = cuspat.cuspatientid;
+            $('.submit').addClass('bg_trans')
+        } else {
+            $('.submit').removeClass('bg_trans')
+        }
+
+    }
+
+
+    function submitOrder(that) {
+
+
+        if (!PageM.cuspatient) {
+            Comm.message('请选择就诊人');
+            return;
+        }
+
+        if ($('.readme').hasClass('noreadme')) {
+            return Comm.message('同意服务协议才可操作');
+        }
+
+
+
+        if ($(that).hasClass('bg_trans')) {
+            var params = PageM.orderModel || {};
+            SLNetwork('post', '/api/appointment/goappoint', params, function (data) {
+                if (data.code == 1) {
+                    nslog(data);
+                    var oid = data.data;
+                    Comm.go('appointmentComplect.html?oid=' + oid);
+                } else {
+                    if (skip){
+                        Comm.message(data.msg);
+                    } else {
+                        if (data.code == 11) {
+                            Comm.go('appointmentFail.html?did=' + PageM.doctor.doctorid + '&cid=' + PageM.orderModel.clinicid);
+                        } else if (data.code == 10) {
+                            Comm.message(data.msg);
+                        } else {
+                            Comm.message(data.msg);
+                        }
+                    }
+                }
+
+            });
+        }
+    }
+
+    function toRead(t, e) {
+
+        if (!t) {
+            t = $('.readme')[0];
+            $(t).attr('src', "img/agree_y.png");
+            $(t).removeClass('noreadme');
+        } else {
+            t = t.find('img')[0];
+            if (e)
+                var e = e.event || window.event;
+            if ($(t).hasClass('noreadme')) {
+                $(t).attr('src', "img/agree_y.png");
+                $(t).removeClass('noreadme')
+                Comm.db('regread', 1);
+            } else {
+                $(t).attr('src', "img/agree_n.png");
+                $(t).addClass('noreadme');
+                Comm.db('regread', null);
+            }
+            if (e) event.stopPropagation();
+        }
+
+    }
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,517 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>订单</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+        .page {
+            display: none;
+        }
+
+        .segItem {
+            color: #717171;
+            line-height: 25px;
+        }
+
+        .segItem.active {
+            color: #E30008;
+            border-bottom: 2px solid #E30008;
+        }
+
+        .statuBar {
+            height: 40px;
+            line-height: 15px;
+            box-sizing: unset;
+        }
+
+        .p15h {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .iconContain {
+            width: 75px;
+            height: 75px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .optionItem {
+            color: #EF5F1E;
+            border: 1px solid #EF5F1E;
+            width: 80px;
+            line-height: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-left: 10px;
+            margin-bottom: 5px;
+        }
+
+        .optionItem.unImp {
+            /*color: #B3B3B3;*/
+            color: black;
+            border: 1px solid #E5E5E5;
+        }
+
+
+
+
+
+
+
+        /*预约订单cell*/
+        .orderCell {
+            padding: 20px 15px;
+            padding-bottom: 0px;
+            background-color: white;
+        }
+
+
+        .lh15 {
+            line-height: 15px;
+            min-height: 15px;
+        }
+
+        .lh10 {
+            line-height: 10px;
+            min-height: 10px;
+        }
+
+        .placeImg {
+            min-width: 35px;
+            min-height: 35px;
+        }
+
+        .hIcon {
+            width: 35px;
+            height: 35px;
+            margin-right: 10px;
+        }
+
+        .state {
+            color: #ED0B00;
+        }
+
+        .topTip {
+            margin: 0px 15px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 5px;
+            padding: 0px 10px;
+            background-color: #EF5F1E;
+            display: none;
+        }
+
+        .textInd{
+            text-indent: -7px;
+            margin: 5px 0px;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navTitle">我的预约</div>
+        </div>
+
+
+        <div class="segBar flex_around pad_v10">
+            <div class="segItem active">全部<span class="count_total count"></span></div>
+            <div class="segItem">待就诊<span class="count_waitcheck count"></span></div>
+            <div class="segItem">待评价<span class="count_waitcomment count"></span></div>
+            <div class="segItem">已完成<span class="count_complet count"></span></div>
+        </div>
+
+        <div class="col_white topTip TBreak wordW">您有<span class="waitCount"></span>个预约还未就诊，请及时就诊！</div>
+
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="bg_lgray">
+
+        <div class="page mescroll" id="refreshId0">
+            <div id="id_list0">
+
+            </div>
+        </div>
+
+
+        <div class="page mescroll" id="refreshId1">
+            <div id="id_list1">
+
+            </div>
+        </div>
+
+        <div class="page mescroll" id="refreshId2">
+            <div id="id_list2">
+
+            </div>
+        </div>
+
+        <div class="page mescroll" id="refreshId3">
+            <div id="id_list3">
+
+            </div>
+        </div>
+
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer class="shared"></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/art-template.js"></script>
+    <script src="inc/mescroll/mescroll.min.js"></script>
+    <script src="js/dict.js"></script>
+
+
+
+    <script>
+        var curPageIdx = parseInt(Comm.query('type')) || 0;
+        var pageRefArr = [],
+            dataSourseDic = {};
+
+        Foot.init();
+
+        function pageload() {
+            showWithPageIndex(curPageIdx);
+        }
+
+
+        function pageresume() {
+            var refresh = Comm.db('del');
+            Comm.db('del', null);
+            if (refresh) {
+                window.location.reload();
+            }
+            checkNeedRefreshPage(function (a) {
+                if (a.type == 1) {
+                    replaceOrderCell(a.oid);
+                    getOrderCount();
+                } else {
+                    addrefresh(curPageIdx);
+                }
+            })
+        }
+
+
+        //点击切换状态
+        clickList('.segBar', '.segItem', function (o, idx) {
+            showWithPageIndex(idx);
+        });
+
+
+        //切换到状态对应的页面
+        function showWithPageIndex(pageIndex) {
+            logText(pageIndex);
+            curPageIdx = pageIndex;
+            $('.page').removeClass('show');
+            $($('.page')[pageIndex]).addClass('show');
+
+            $('.segBar .segItem').removeClass('active');
+            $($('.segBar .segItem')[pageIndex]).addClass('active');
+
+            addrefresh(pageIndex);
+        }
+
+
+        //
+        function addrefresh(idx) {
+            var merefresh = pageRefArr[idx];
+
+            if (!merefresh) {
+                merefresh = new MERefresh();
+
+                merefresh.refreshOption.refreshUrl = '/api/appointment/list';
+                merefresh.refreshOption.noMoreSize = 4;
+
+
+                var requestState = idx + 1;
+                merefresh.refreshOption.refreshParm = {
+                    status: requestState == 1 ? -1 : requestState
+                }
+
+                //页面 <刷新> 的回调
+                merefresh.refreshOption.refresh_cb = function (refresh, d) {
+                    d.data = d.data || [];
+                    if (d.data) {
+                        refresh.successEndRef(d.data && d.data.length, d.totalCount);
+                    }
+
+                    if (d.code == 1) {
+                        var list = d.data || [];
+                        var html = getOrderList(list);
+                        merefresh.appendHtml(html);
+                    } else {
+                        Comm.message(d.msg);
+                    }
+                };
+                merefresh.configurationDone('refreshId' + idx, 'id_list' + idx);
+                pageRefArr[idx] = merefresh;
+            } else {
+                merefresh.MeRefScroll.triggerDownScroll();
+            }
+            getOrderCount();
+        }
+
+
+        //获取订单数量
+        function getOrderCount() {
+            var params = {}
+            SLNetwork('get', '/api/appointment/listCount', params, function (data) {
+                if (data.code == 1) {
+                    var list = data.data || [{}];
+                    var countM = list[0];
+                    $('.count').text('');
+
+                    $('.topTip').hide();
+                    if (countM.waitcheck > 0) {
+                        $('.topTip').show();
+                        $('.waitCount').text(countM.waitcheck);
+                    }
+                    Comm.resizeSection();
+
+                    for (var k in countM) {
+                        var count = parseInt(countM[k]);
+                        if (count) {
+                            $('.count_' + k).text('(' + count + ')')
+                        } else {
+                            $('.count_' + k).text('')
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+        //根据数据返回内容html
+        function getOrderList(list) {
+            list.forEach(function (a) {
+                if (!a) return;
+                dataSourseDic[a.ordersId] = a;
+            })
+
+            var html = template('tp_id_orderCell', list);
+            return html;
+        }
+
+
+
+
+
+        //订单操作
+        function orderOption(type, oid, telOrDid, directlyDel) {
+            if (event) event.stopPropagation();
+            preventRepeadClickDeal(function () {
+
+                var apistr;
+                var mess = '确定要执行该操作吗?';
+
+                switch (type) {
+                    case 1: {
+                        if (telOrDid) {
+                            Comm.openUrlStr('tel:' + telOrDid);
+                        } else {
+                            Comm.message('无法联系到诊所');
+                        }
+                        return;
+                    }
+                    break;
+
+                case 2: {
+                    addNeedRefPage('tabPage3', {
+                        oid: oid,
+                        type: 1
+                    });
+                    //评价
+                    Comm.go('evaluate.html?oid=' + oid);
+                    return;
+                }
+
+                case 3: {
+                    //再次预约
+                    Comm.go('docDetail.html?did=' + telOrDid)
+                    return;
+                }
+
+                case 9: {
+                    apistr = '/api/appointment/cancel';
+                }
+                break;
+
+                case 10: {
+                    //删除
+                    apistr = '/api/appointment/delete';
+                }
+                break;
+
+                default:
+                    break;
+                }
+
+
+                if (!apistr || !apistr.length) return;
+
+                var parm = {
+                    docappointmentid: oid
+                }
+
+
+                Comm.confirm(mess, function (t) {
+                    if (t == 1) {
+                        Comm.loading('正在处理...');
+                        SLNetwork('post', apistr, parm, function (data) {
+                            Comm.loading();
+                            if (data.code == 1) {
+                                if (type == 9) { //取消订单
+                                    Comm.message('已取消预约');
+                                    replaceOrderCell(oid);
+                                } else if (type == 10) { //删除订单
+                                    var sel = '#id_list' + curPageIdx + ' #cell_' + oid;
+                                    console.log(sel);
+                                    $(sel).remove();
+                                    // Comm.message('删除成功');
+                                    window.location.reload();
+                                    return;
+                                }
+                            } else {
+                                Comm.message(data.msg);
+                            }
+                        });
+                    }
+                });
+
+            }, 1, 200)
+        }
+
+
+        function replaceOrderCell(orderId) {
+
+            if (!orderId) return;
+            var params = {
+                docappointmentid: orderId
+            }
+            SLNetwork('get', '/api/appointment/info', params, function (data) {
+                if (data.code == 1) {
+                    var orderCellModel = data.data || {};
+
+                    orderCellModel.isSingle = true;
+                    var sel = '#id_list' + curPageIdx + ' #cell_' + orderId;
+                    var eleCell = $(sel);
+                    var html = getOrderList([orderCellModel]);
+                    eleCell.replaceWith(html);
+                } else {
+                    debugMessage(data.msg);
+                }
+            });
+        }
+    </script>
+
+
+    <script type="text/html" id="tp_id_orderCell">
+        {{each $data model i}}
+
+        <div class="orderCell flex flexItem_h flexItem_between" id="cell_{{model.docappointmentid}}"
+            onclick="Comm.go('orderDetail.html?oid={{model.docappointmentid}}')">
+
+            <img class="placeImg br3 hIcon" src="{{OSS(model.head,'s')}}" onerror="app.herrorimg(this);">
+
+            <div class="rightView bottomBorder paddb20 flex1 f12">
+
+                <div class="flex flex_between"
+                    onclick="event.stopPropagation();Comm.go('clinicDetails.html?cid={{model.clinicid}}')">
+                    <div>
+                        <div class="flex_start" style="width:200px;">
+                            <div class="name f16 lh15 baseW indicator mb5 textHide">{{model.clinicname||''}}</div>
+                        </div>
+
+                        <div class="time f12 lh10 baseW">{{formatDate(model.subdate,'Y-m-d H:i')}}</div>
+                    </div>
+
+                    {{if model.status == 2}}
+                    <div class="state">待就诊</div>
+                    {{else if model.status == 3}}
+                    <div class="state">待评价</div>
+                    {{else if model.status == 4}}
+                    <div class="state">已完成</div>
+                    {{else if model.status == 0}}
+                    <div class="state">已取消</div>
+                    {{/if}}
+
+                </div>
+
+
+                <div class="mart20">
+
+                    {{if model.status == 2}}
+                    <div class="textInd">【就诊序号: <span class="col_theme bold">{{model.daynum ||''}}</span>】</div>
+                    {{/if}}
+                    <div>
+                        <span>就诊时间：{{model.targetdate||''}}（{{getWeekD(model.targetdate)}}）{{getAPm(model.targettype)}}
+                            {{if model.targettype == 0}}{{model.upworktime}}{{else}}{{model.downworktime}}{{/if}}</span>
+                    </div>
+                    <div class="mt5 mb5">
+                        <span>就诊人：{{model.cuspatientname||''}}</span>
+                    </div>
+
+                    <div>
+                        <span>诊所地址：{{model.cliniclocate||''}}</span>
+                    </div>
+                </div>
+
+                <div class="flex_between mart20">
+
+                    <div></div>
+                    <div class="flex_wrap optionBar flexItem_reverse_R">
+
+                        {{if model.status == 2}}
+                        <div class="optionItem"
+                            onclick="orderOption(1,{{model.docappointmentid}},{{model.clinicphone}})">联系诊所</div>
+                        <div class="optionItem unImp" onclick="orderOption(9,{{model.docappointmentid}})">取消预约</div>
+                        {{else if model.status == 3}}
+                        <div class="optionItem" onclick="orderOption(2,{{model.docappointmentid}})">立即评价</div>
+                        <div class="optionItem unImp"
+                            onclick="orderOption(1,{{model.docappointmentid}},{{model.clinicphone}})">联系诊所</div>
+                        {{else if model.status == 4}}
+                        <div class="optionItem" onclick="orderOption(3,{{model.docappointmentid}},{{model.doctorid}})">
+                            再次预约</div>
+                        <div class="optionItem unImp" onclick="orderOption(10,{{model.docappointmentid}})">删除</div>
+                        {{else}}
+                        <div class="optionItem unImp" onclick="orderOption(10,{{model.docappointmentid}})">删除</div>
+                        {{/if}}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{/each}}
+    </script>
+
+
+</body>
+
+</html>

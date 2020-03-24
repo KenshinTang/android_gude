@@ -1,0 +1,587 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>首页</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/side/side.css">
+    <link rel="stylesheet" href="inc/mescroll/swiper.min.css">
+
+    <style>
+        header,
+        .navBar {
+            position: relative;
+        }
+
+        .position {
+            background-image: url("img/position.png");
+        }
+
+        .navTitle {
+            width: 40%;
+            margin: 0;
+            background-size: auto 20px;
+            box-sizing: initial;
+            position: absolute;
+            bottom: 0px;
+            left: 30%;
+            right: 30%;
+            z-index: 1;
+            color: #F7775F;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .navItemIcon.scan {
+            background-image: url("img/scanf.png");
+            background-size: auto 19px;
+        }
+
+        /*推荐诊所*/
+        .rcm_headBar {
+            line-height: 50px;
+            padding: 0px 15px;
+        }
+
+        .headBar_right {
+            width: 60%;
+        }
+
+        .itemsBar {
+            white-space: nowrap;
+        }
+
+        .itemsBar .item {
+            margin-right: 25px;
+            position: relative;
+        }
+
+        .itemsBar .item.active {
+            color: #EF5F1E;
+            font-size: 16px;
+        }
+
+        .item.active:after {
+            position: absolute;
+            bottom: 1px;
+            margin: auto;
+            background-color: #EF5F1E;
+            content: ' ';
+            height: 2px;
+            width: 100%;
+            left: 0%;
+        }
+
+        .msgText {
+            /*max-width: 300px;*/
+        }
+
+        .swiper-slide,
+        .swiper-wrapper,
+        .swiper-container {
+            height: 161px;
+        }
+
+        .swiper-container-horizontal > .swiper-pagination-bullets, .swiper-pagination-custom, .swiper-pagination-fraction {
+            bottom: 13px;
+        }
+
+        .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {
+            margin: 0 3px;
+        }
+
+        .indicator {
+            padding-right: 25px;
+            background-position: right 15px center;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+
+<div class="flex_center mainH mainW alertCt hide">
+
+    <div class="showAlert flex flexItem_between flexItem_v center">
+
+
+        <div class="alertTT">title</div>
+        <div class="alertMessage">message</div>
+        <div class="alertOptionBar flex_between">
+            <div class="alertOption cancel" onclick="sureClicked(false)">暂不使用</div>
+            <div class="alertOption sure" onclick="sureClicked(true);">同意</div>
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<header>
+    <div class="navBar clearfix">
+        <div class="navBack rIcon position marl10" onclick="Comm.go('choosePosition.html')"></div>
+        <div class="navItemIcon scan marr10" onclick="scanCode();"></div>
+        <div class="navTitle col_theme f24">古德博士</div>
+
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="bg_lgray scroll-y">
+
+    <div class="marg_h10">
+
+        <div class="wrap banner br5 hide">
+            <div class="wrap_ct">
+                <!--轮播-->
+
+                <div class="mainW mainH br5 ohide bg_lgray" id="id_banner">
+                    <ul class="list fullImg side_ul br5 ohide" id="id_side">
+
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div>
+
+        <!--百科资讯-->
+        <div class="m15 bg_white br5" onclick="Comm.go('goodsClass.html')">
+
+            <div class="swiper-container">
+                <div class="swiper-wrapper infoList">
+
+
+                </div>
+
+                <div class="swiper-pagination"></div>
+
+            </div>
+
+        </div>
+
+
+        <!--推荐诊所-->
+        <div class="recomment">
+
+            <div class="rcm_headBar flex_between bottomBorder bg_white">
+                <div class="bold f18">推荐诊所</div>
+
+                <div class="headBar_right scroll-x">
+                    <div class="itemsBar flex_start classList">
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- 推荐诊所 - - 列表 -->
+            <div class="rcmList">
+
+            </div><!-- 推荐诊所 - - 列表 -->
+        </div>
+        <!--推荐-->
+    </div>
+
+</section>
+
+
+<!--******************************************************************************-->
+<footer class="shared"></footer>
+<script src="js/area.js"></script>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/side/side.js"></script>
+<script src="inc/mescroll/swiper.min.js"></script>
+<script src="js/dict.js"></script>
+
+<script src="js/roots.js"></script>
+
+
+<script>
+    var requestParams;
+    var agree = false;
+    config.notDeal = true;
+
+    Foot.init();
+    Area.init();
+    var userinfo = Comm.db('userinfo') || {},
+        pageModel = {
+            clinicdict: null,
+        };
+
+    function pageload() {
+        getPosition();
+        getBannerInfo();
+        getInfoList();
+        loadRecommentClass();
+
+        Comm.storage('startApp', function (d) {
+            if (d == 1) {
+                Comm.db('startApp', 1);
+                getPosition();
+                Comm.storageValue('startApp', 2)
+            }
+        });
+
+        if (!Comm.db('agree')) {
+            showYS();
+        }
+
+
+    }
+
+
+    function showYS() {
+        //根据id获取广告详情
+
+
+        console.log('getAdverWithAid');
+        config.notDeal = true;
+        var params = {
+            articleid: 12
+        }
+        SLNetwork('get', '/api/article/info', params, function (data) {
+
+            if (data.code == 1) {
+                var model = data.data;
+
+                $('.alertTT').html(model.articlename);
+                $('.alertMessage').html(model.section);
+                $('.alertCt').removeClass('hide');
+
+            } else {
+
+            }
+        });
+    }
+
+
+    function sureClicked(agr){
+        agree = agr;
+        if (agree) {
+            Comm.db('agree',true);
+        }
+        $('.alertCt').toggleClass('hide');
+    }
+
+
+    function pageresume() {
+        if (!app.isLogin()) {
+            app.clearUserData();
+        }
+        getPosition();
+    }
+
+
+    function getPosition(cb) {
+
+
+        var aaa = Comm.db('showArea');
+        Comm.db('showArea', null);
+
+        if (aaa) {
+            var position = UserJWD.JWD();
+            position.dis = aaa.text;
+            position.aid = aaa.i;
+            Comm.db('JWD', position);
+        }
+
+        var startStatus = Comm.db('startApp') || 1;
+
+        if (!UserJWD.hasGetPosition() || startStatus == 1) {
+            Comm.position(function (a) {
+                if (a.code == 1) {
+
+                    if (!UserJWD.hasGetPosition() || startStatus == 1) {
+                        Comm.db('startApp',2);
+                        UserJWD.saveJWDValue(a);
+                    } else {
+                        UserJWD.updateJWDValue(a);
+                    }
+                }
+                $('.position').text(UserJWD.dis());
+                cb && cb();
+                loadRecommentClass();
+            })
+        } else {
+            $('.position').text(UserJWD.dis());
+            cb && cb();
+            loadRecommentClass();
+        }
+
+    }
+
+    /************************************************************************************************/
+
+    //获取广告banner
+    function getBannerInfo() {
+
+        var params = {};
+        SLNetwork('get', '/api/advert/list', params, function (a) {
+            if (a.code == 1) {
+                var showArr = a.data || [];
+                if (showArr.length) {
+                    $('.banner').removeClass('hide');
+                } else {
+                    return;
+                }
+                showArr.sort(function (a, b) {
+                    return a.orderIndex - b.orderIndex;
+                });
+
+                var bannerEle = template('tp_bannerId', showArr);
+                $('#id_side').html(bannerEle);
+                new Side('id_banner', true);
+            }
+        });
+    }
+
+
+    //获取资讯列表
+    function getInfoList() {
+        var params = {
+            pagesize: 9
+        }
+        SLNetwork('get', '/api/article/list', params, function (a) {
+            if (a.code == 1) {
+                var list = a.data || [];
+
+
+                var count = Math.ceil(list.length / 3);
+
+                var newList = [];
+                for (var i = 0; i < count; i++) {
+                    var tempList = [];
+                    for (var j = 0; j < 3; j++) {
+                        var idx = i * 3 + j;
+                        if (idx >= list.length) {
+                            break;
+                        }
+                        tempList.push(list[idx]);
+                    }
+                    newList.push(tempList);
+                }
+
+                var htmlEle = template('tp_id_info', newList);
+                $('.infoList').html(htmlEle);
+
+                initSwiper();
+            }
+        });
+    }
+
+
+    //获取推荐列表
+    function getRecommendList() {
+
+        requestParams = {
+            lat: UserJWD.lat(),
+            lng: UserJWD.lng(),
+            clinicareaid: UserJWD.aid(),
+            clinicdict: pageModel.clinicdict,
+        }
+        SLNetwork('get', '/api/clinic/list', requestParams, function (a) {
+            if (a.code == 1) {
+                var showArr = a.data || [];
+                showArr.forEach(function (ele, idx) {
+                    ele.tags = [];
+                    if (ele.spicaldict && ele.spicaldict && ele.spicaldict.length) {
+                        ele.tags = ele.spicaldict.split(',')
+                    }
+                })
+
+                var htmlEle = template('tp_cellId', showArr);
+                $('.rcmList').html(htmlEle);
+                dealStar('.starMark');
+            }
+        });
+    }
+
+
+    //获取诊所类别
+    function loadRecommentClass() {
+        Comm.loading(1);
+        GDict.init(function () {
+            Comm.loading();
+
+            var arr1 = GDict.get('clinictype') || [];
+            var arr = [];
+
+
+            arr1.forEach(function (o, i) {
+                arr.insert(o, 0);
+            });
+
+
+            var all = {
+                dictId: '',
+                dictcode: "",
+                dictname: "全部",
+                dictpid: '',
+                dicttype: "clinictype",
+                orderindex: 0,
+                remark: "",
+            };
+            arr.insert(all, 0);
+
+            if (arr && arr.length) {
+                $('.classList').html(template('tp_id_classH', arr));
+
+                pageModel.clinicdict = arr[0].dictId;
+                meauChooseClick('.headBar_right', '.item', function (ele, idx) {
+                    pageModel.clinicdict = $(ele).attr('tid');
+                    getRecommendList();
+                });
+            }
+            getRecommendList();
+        });
+    }
+
+
+    Array.prototype.insert = function (item, index) {
+        this.splice(index, 0, item);
+    };
+
+
+    /************************************************************************************************/
+
+
+    function initSwiper() {
+        var mySwiper = new Swiper('.swiper-container', {
+
+            // 轮播图的方向，也可以是vertical方向
+            direction: 'horizontal',
+            pagination: '.swiper-pagination',
+        });
+
+
+    }
+</script>
+
+
+<!--广告-->
+<script type="text/html" id="tp_bannerId">
+    {{each $data model i}}
+    <li class="imgCt_cover br5 ohide"
+        onclick="showAdver({{model.itemid}},{{model.adverttype}},{{model.advertid}});">
+        <!--{{model.adverttype}}-->
+        <img src="{{OSS(model.face,'l')}}" class="bannerImg" alt="" onerror="app.errorimg(this);">
+    </li>
+    {{/each}}
+</script>
+
+
+<!--资讯-->
+<script type="text/html" id="tp_id_info">
+    {{each $data list i}}
+
+    <div class="swiper-slide">
+        <div>
+            <div class="p15 bold f16 indicator">百科资讯</div>
+
+            <div class="infoMsgList">
+
+                {{each list model j}}
+
+                <div class="info flex_between pl15 pr15 mt5 mb10"
+                     onclick="event.stopPropagation();Comm.go('artical.html?type=1&aid={{model.articleid}}')">
+                    <img src="img/tag.png" width="13">
+                    <div class="f13 ml5 wordW msgText flex1">{{model.articlename||''}}</div>
+                    <img src="img/fire.png" width="13">
+                </div>
+
+                {{/each}}
+
+            </div>
+
+            <div class="pt10"></div>
+        </div>
+    </div>
+
+    {{/each}}
+</script>
+
+
+<!--推荐-->
+
+<script type="text/html" id="tp_id_classH">
+    {{each $data model i}}
+    {{if i == 0}}
+    <div class="item active" tid="{{model.dictId}}">{{model.dictname||''}}</div>
+    {{else}}
+    <div class="item" tid="{{model.dictId}}">{{model.dictname||''}}</div>
+    {{/if}}
+    {{/each}}
+</script>
+
+
+<script type="text/html" id="tp_cellId">
+    {{each $data model i}}
+
+    <div class="rcm_goodsCell flex flexItem_between mb10"
+         onclick="Comm.go('clinicDetails.html?cid={{model.clinicid||0}}')">
+        <img class="faceImg bg_lgray br5 placeImg" src="{{OSS(model.head,'s')}}" onerror="app.errorimg(this);">
+
+        <div class="flex1 flex flexItem_v flexItem_between marl15">
+
+            <div class="flex baseWH">
+                <div class="rcm_title f16 bold TBreak autoTextW" style="width: 0">
+                    <p class="mainW wordW">{{model.clinicname||''}}</p>
+                </div>
+            </div>
+
+
+            <div class="rcm_info baseWH mt5 mb5 flex_between col_sub baseWH">
+
+                <div class="evaluate flex_start">
+                    <div style="margin-top:1px;"><img src="img/star_y.png" style="width:8px;height:8px;"/></div>
+                    <div class="f12 lineSpan">
+                        <span class="col_theme ml5 point">{{model.avgvalue||0}}分</span>
+                        <span class="col_lgray f14 lineV">丨</span>
+                        <span>已服务{{model.servercount||0}}人</span>
+                    </div>
+                </div>
+
+                <div class="f12 col_sub999" style="margin-top:2px;">{{distance(model.distance)}}</div>
+
+            </div>
+
+            <div class="rcm_tag flex_wrap baseWH">
+                {{each model.tags tid i}}
+                {{if getTag(tid)}}
+                <div class="tagLabel textHide">{{getTag(tid)}}</div>
+                {{/if}}
+                {{/each}}
+            </div>
+
+        </div>
+
+    </div>
+
+    {{/each}}
+</script>
+
+</body>
+
+</html>

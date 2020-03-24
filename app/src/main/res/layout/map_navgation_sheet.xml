@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:id="@+id/baidu_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20px"
+        android:layout_marginRight="20px"
+        android:layout_marginTop="35px"
+        android:background="@drawable/ditubeijing"
+        android:gravity="center"
+        android:text="百度地图"
+        android:textColor="#224E8F" />
+
+    <!-- <View
+         android:layout_width="match_parent"
+         android:layout_height="1px"
+         android:background="#cdcdcd" />-->
+
+    <TextView
+        android:id="@+id/gaode_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20px"
+        android:layout_marginRight="20px"
+        android:layout_marginTop="10px"
+        android:background="@drawable/ditubeijing"
+        android:gravity="center"
+        android:text="高德地图"
+        android:textColor="#224E8F" />
+
+    <!--  <View
+          android:layout_width="match_parent"
+          android:layout_height="1px"
+          android:background="#cdcdcd" />-->
+
+    <TextView
+        android:id="@+id/tencent_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="30px"
+        android:paddingTop="30px"
+        android:text="腾讯地图"
+        android:visibility="gone" />
+
+
+    <!--<View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#cdcdcd" />-->
+
+    <!--
+        android:paddingBottom="30px"-->
+    <TextView
+        android:id="@+id/cancel_btn2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="40px"
+        android:layout_marginLeft="20px"
+        android:layout_marginRight="20px"
+        android:layout_marginTop="15px"
+        android:background="@drawable/ditubeijing"
+        android:gravity="center"
+        android:text="取消"
+        android:textColor="#224E8F" />
+
+</LinearLayout>

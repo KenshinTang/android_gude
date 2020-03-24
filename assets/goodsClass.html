@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <title>健康百科</title>
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="css/g.css">
+    <style>
+
+        /*左边*/
+        .leftV {
+            width: 22.5%;
+            float: left;
+            height: 100%;
+            overflow-y: scroll;
+            padding-top: 20px;
+        }
+
+        .lItem {
+            width: 100%;
+            text-align: center;
+            line-height: 45px;
+            height: 45px;
+            /*padding: 15px 0px;*/
+            box-sizing: unset;
+        }
+
+        .leftV > .active {
+            background-color: white;
+        }
+
+        .active::before {
+            background-color: #E30008;
+            float: left;
+            width: 2px;
+            height: 100%;
+            content: ' ';
+        }
+
+        .rightV {
+            margin-left: 22.5%;
+            height: 100%;
+            background-color: white;
+            overflow-y: scroll;
+        }
+
+        .bg_left {
+            background-color: #F5F7FA;
+        }
+
+        /*右边*/
+        .secondFl {
+            padding: 0px 10px;
+        }
+
+        .classItemTitle {
+            line-height: 50px;
+            height: 50px;
+            min-width: 20px;
+        }
+
+        .classItem {
+            color: #37444D;
+            padding: 0px 20px;
+            line-height: 30px;
+            margin-bottom: 20px;
+            margin-right: 8px;
+            font-size: 12px;
+            border: 1px solid #D2D2D2;
+            border-radius: 16px;
+        }
+
+
+        .hasNone {
+            height: 300px;
+            width: 100%;
+            line-height: 300px;
+            text-align: center;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+        }
+
+
+    </style>
+</head>
+<body>
+<header>
+
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle">健康百科</div>
+    </div>
+</header>
+
+<section>
+
+    <div class="page hide nodata flex flexItem_v flexItem_center_js">
+        <div class="flex_center">
+            <div>没有找到相关的数据</div>
+        </div>
+
+        <div class="flex_center m15">
+            <div class="bg_theme p5 br3 col_white" onclick="fillWithClassfication();">点我重新获取</div>
+        </div>
+
+    </div>
+
+    <div class="page hide content">
+        <div class="leftV bg_left firstFl">
+
+            <!--<div class="lItem active" tid="1">-->
+            <!--<div class="row1">咨询</div>-->
+            <!--</div>-->
+
+        </div>
+
+
+        <div class="rightV secondFl bg_lgray">
+
+            <!--<div class="classItemTitle bold">医疗</div>-->
+
+            <!--<div class="flex_wrap">-->
+            <!--<div class="classItem">健康咨询</div>-->
+
+            <!--</div>-->
+
+        </div>
+    </div>
+
+
+</section>
+
+</body>
+
+
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/dict.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+
+
+<script type="text/html" id="tp_id_first">
+
+    {{each $data model i}}
+    <div class="lItem">
+        <div class="row1">{{model.dictname}}</div>
+    </div>
+    {{/each}}
+
+
+</script>
+
+<script type="text/html" id="tp_id_second">
+
+
+    <div class="classItemTitle bold">{{first.dictname||''}}</div>
+
+
+    {{if second && second.length}}
+    <div class="flex_wrap">
+        {{each $data.second model i}}
+        <div class="classItem" tid="{{model.dictId}}">{{model.dictname}}</div>
+        {{/each}}
+    </div>
+    {{else}}
+
+    <div class="hasNone">没有发现</div>
+
+    {{/if}}
+
+
+</script>
+
+
+<script>
+    var pageModel = {};
+
+    function pageload() {
+
+        Comm.loading(1);
+        GDict.init(function () {
+            Comm.loading();
+            fillWithClassfication();
+        },true);
+
+    };
+
+
+    //填充顶部分类
+    function fillWithClassfication(ar) {
+
+        var allModel = {
+            cs: [{dictId: 999999,
+                dictname: "全部",
+            }],
+            dictname: "全部分类",
+        }
+
+
+        var arr = GDict.getItem('1').cs || [];
+        arr.insert(allModel,0);
+        pageModel.list = arr;
+
+        $('.page').addClass('hide');
+        if (!arr.length) {
+            $('.nodata').removeClass('hide');
+            return;
+        } else {
+            $('.content').removeClass('hide');
+        }
+
+        var list = template('tp_id_first', arr);
+        $('.firstFl').html(list);
+
+        //点击一级分类
+        meauChooseClick('.leftV', '.lItem', function (t, idx) {
+            clickedLeftIndex(idx);
+        });
+        clickedLeftIndex(0);
+    }
+
+    //一级分类事件处理
+    function clickedLeftIndex(idx) {
+        $($('.lItem')[idx]).addClass('active');
+
+        var tModel = pageModel.list[idx];
+        pageModel.firstM = tModel;//GDict.getItem(tModel.dictId);
+
+        var arr = tModel.cs;//GDict.get(tModel.dictcode);
+
+        var secModel = {
+            first: tModel,
+            second: arr
+        }
+
+        var list = template('tp_id_second', secModel);
+        $('.secondFl').html(list);
+
+
+        //点击二级分类
+        clickList('.rightV', '.classItem', function (t, idx) {
+            pageModel.secondM = pageModel.firstM.cs[idx];
+
+            var parm = {
+                type: pageModel.dicttype||'',
+                ftid: pageModel.firstM.dictId||'',
+                stid: pageModel.secondM.dictId||'',
+            };
+
+            Comm.db('title',pageModel.secondM.dictname);
+            Comm.go(appendApi('infomationList.html', parm));
+        });
+    }
+
+    Array.prototype.insert = function (item,index) {
+        this.splice(index, 0, item);
+    };
+
+
+</script>
+</html>

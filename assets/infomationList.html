@@ -1,0 +1,230 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>健康资讯</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle">健康资讯</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="page mescroll chatroom bg_lgray" id="refreshId0">
+
+    <div class="list">
+        <ul id="id_list0">
+            <!--列表-->
+        </ul>
+    </div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script type="text/javascript" src="js/z.js"></script>
+<script type="text/javascript" src="js/g.js"></script>
+<script type="text/javascript" src="js/comm.js"></script>
+<script type="text/javascript" src="js/art-template.js"></script>
+<script type="text/javascript" src="js/api.js"></script>
+<script type="text/javascript" src="inc/mescroll/mescroll.min.js"></script>
+
+
+<script>
+
+
+    var merefresh = null,articleType = Comm.query('stid');
+    var title = Comm.db('title')||'资讯';
+    Comm.db('title',null);
+
+    function pageload() {
+        $('.navTitle').text(title);
+        addrefresh();
+    }
+
+
+    //添加刷新控件
+    function addrefresh() {
+
+        if (!merefresh) {
+
+            merefresh = new MERefresh();
+
+            merefresh.refreshOption.refreshUrl = '/api/article/list';
+            merefresh.refreshOption.noMoreSize = 2;
+            merefresh.refreshOption.getNum = 3;
+            merefresh.refreshOption.refreshParm = {
+                articletype:articleType||''
+            };
+
+
+            //页面 <刷新> 的回调
+            merefresh.refreshOption.refresh_cb = function (refresh, d) {
+
+                if (d.code == 1) {
+                    var list = d.data || [];
+                    refresh.successEndRef(list.length, d.totalCount || 0);
+
+                    var flag = false;
+                    list.forEach(function (ele, idx) {
+                        if (ele.face && ele.face && ele.face.length) {
+                            var imgs = ele.face.split(',') || [];
+
+                            if (imgs.length >= 3) {
+                                ele.showType = 3;
+                                ele.imgs = imgs.splice(0, 3);
+                            } else {
+                                flag = !flag;
+                                ele.showType = flag ? 1 : 2;
+                                ele.imgs = imgs.splice(0, 3);
+                            }
+                            ele.head = ele.imgs[0];
+                        }
+                    })
+
+
+
+
+                    var html = template('tp_id_infomation', list);
+                    merefresh.appendHtml(html);
+                } else {
+                    Comm.message(d.msg);
+                }
+
+            };
+
+            merefresh.configurationDone('refreshId0', 'id_list0');
+        } else {
+
+        }
+    }
+
+
+    // 查看百科详情
+    function BKShow(artId) {
+        Comm.go('artical.html?type=1&aid='+artId);
+    }
+
+
+</script>
+
+
+<script type="text/html" id="tp_id_infomation">
+
+    {{each $data as model i}}
+
+    {{if model.showType == 1}}
+
+    <div class="p15 marb10 bg_white" onclick="BKShow({{model.articleid}})">
+
+        <div class="topImg">
+            <div class="wrap">
+                <div class="wrap_ct imgContain">
+                    <img class="placeImg" alt="" src="{{OSS(model.face,'m')}}" onerror="app.errorimg(this)">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="f17 TBreak wordW pt10 pb10 baseWH">{{model.articlename||''}}</div>
+
+        <div class="flex_between">
+            <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+            <div class="lIcon scan">{{getCount(model.readcount)}}阅读</div>
+        </div>
+
+
+    </div>
+
+
+    {{else if model.showType == 2}}
+
+    <div class="p15 marb10 bg_white" onclick="BKShow({{model.articleid}})">
+
+
+        <div class="flex flexItem_between">
+
+
+            <div class="flex1 flex flexItem_v flexItem_between">
+                <div class="f17 TBreak wordW2 flex1 mb5">{{model.articlename||''}}</div>
+
+                <div class="flex_between">
+                    <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+                    <div class="lIcon scan">{{getCount(model.readcount)}}阅读</div>
+                </div>
+            </div>
+
+
+            <div class="rightImg imgContain ml10">
+                <img class="placeImg" alt="" src="{{OSS(model.head,'m')}}" onerror="app.errorimg(this);">
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    {{else if model.showType == 3}}
+
+
+    <div class="p15 marb10 bg_white" onclick="BKShow({{model.articleid}})">
+
+        <div class="f17 TBreak wordW">{{model.articlename||'fs'}}</div>
+
+        <div class="pt10 pb10 flex_between">
+
+            {{each model.imgs imgUrl j}}
+            <div class="threeImg">
+                <div class="wrap">
+                    <div class="wrap_ct imgContain">
+                        <img class="placeImg" alt="" src="{{OSS(imgUrl,'s')}}" onerror="app.errorimg(this);">
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+
+        <div class="flex_between">
+            <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+            <div class="lIcon scan">{{getCount(model.readcount)}}阅读</div>
+        </div>
+
+
+    </div>
+
+    {{/if}}
+
+
+    {{/each}}
+
+</script>
+
+
+</body>
+
+</html>

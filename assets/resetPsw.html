@@ -1,0 +1,179 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>修改密码</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        button,
+        input {
+            border: 0px solid white;
+        }
+
+        section div input::-webkit-input-placeholder {
+            line-height: 21px;
+            color: #C7C7CD;
+        }
+
+        .ph {
+            background-color: #fff;
+            border-bottom: 1px solid #ededf5;
+            position: relative;
+        }
+
+        .ph input,
+        .pw input,
+        .code input {
+            height: 50px;
+            box-sizing: border-box;
+            color: #111;
+            padding-left: 30px;
+            background-repeat: no-repeat;
+            background-size: auto 20px;
+            background-position: left center;
+        }
+
+        .pw i,
+        .ph i {
+            position: absolute;
+            right: 10px;
+            top: 20px;
+            padding: 0 5px;
+            width: 30px;
+        }
+
+        .ph i>img,
+        .pw i>img {
+            vertical-align: middle;
+        }
+
+        input {
+            border: none;
+            width: 100%;
+        }
+
+        .leftText {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            bottom: 0px;
+            line-height: 50px;
+            font-size: 17px;
+        }
+
+        .sign-btn {
+            height: 40px;
+            line-height: 40px;
+            background-color: #FF6161;
+            border-radius: 20px;
+            color: white;
+            margin: 30px 20px;
+        }
+
+        .lIcon.psw {
+            background-image: url("img/lock.png");
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section>
+
+        <div class="f24 bold mart30 marb30 marl30">设置密码</div>
+
+
+        <div class="paddl30 paddr30">
+            <div class="ph">
+                <div class="leftText lIcon psw"></div>
+                <input placeholder="输入6位以上的密码" class="f16" type="password" name="password" id="password" data-reg='p'
+                    maxlength="20" />
+            </div>
+
+            <div class="ph">
+                <div class="leftText lIcon psw"></div>
+                <input placeholder="输入6位以上的密码" class="f16" type="password" name="password2" id="password" data-reg='p'
+                    maxlength="20" />
+            </div>
+
+        </div>
+        <div class="mart30 tcenter center sign-btn bg_trans f18" onclick="next()">确定</div>
+
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        function next() {
+            var f = Comm.db('forget');
+            var opt = Check.submit('POST');
+            if (opt) {
+                if (opt.password == opt.password2) {
+                    opt.phone = f.phone;
+                    opt.vcode = f.vcode;
+                    opt.newPwdOne = opt.password;
+
+                    Comm.loading('正在修改密码...');
+
+                    SLNetwork('post', '/api/customer/forgetPwd', opt, function (a) {
+                        Comm.loading();
+                        if (a.code == 1) {
+                            Comm.message('修改成功!');
+                            setTimeout(function () {
+                                Comm.close(2);
+                            }, 300);
+                        } else {
+                            Comm.message(a.msg);
+                        }
+                    });
+
+
+
+                    // AJAX.POST('/api/customer/updatePasswordByPhone', opt, function (a) { //注册
+                    //     Comm.loading();
+                    //     if (a.code == 1) {
+                    //         Comm.message('修改成功!');
+                    //         setTimeout(function () {
+                    //             Comm.close(2);
+                    //         }, 300);
+                    //     } else {
+                    //         Comm.message(a.msg);
+                    //     }
+                    // });
+
+
+                } else {
+                    Comm.message('两次输入的密码不一致');
+                }
+            }
+
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>修改绑定的手机</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .getCode {
+            border: 1px solid #E30008;
+            color: #E30008;
+            border-radius: 3px;
+            padding: 5px 10px;
+            text-align: center;
+        }
+
+        .submit {
+            margin: 100px 10px;
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar">
+            <div class="navBackIcon" onclick="Comm.close();"></div>
+            <div class="navTitle">修改手机号</div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="bg_lgray">
+
+        <div class="topCt paddt30 paddb30 paddl20 paddr20 lh20 f16">
+            <div class="col_sub">系统需要向当前手机号：</div>
+            <div class="flex_start mt5">
+                <div id="phone" class="col_red">136****3210</div>
+                <div class="col_sub">，发送一条验证码</div>
+            </div>
+        </div>
+
+
+        <div class="bg_white flex_between p20">
+            <div class="flex_start">
+                <img src="img/Invitation/yazma.png" width="20" alt="">
+                <input id="code" type="tel" placeholder="请输入验证码" class="marg_h5 f15 lh40" maxlength="6">
+            </div>
+            <button id="yzm" class="getCode" style="background-color:#FFFFFF;" onclick="model.yzm(this);">获取验证码</button>
+        </div>
+
+
+
+        <div class="submit bg_trans col_white f18 lh50 center br5" onclick="model.next()">下一步</div>
+
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        function pageload() {
+            var c = Comm.db('customer');
+            $('#phone').html(c.phone);
+        }
+        var model = {
+            o: {},
+            u: Comm.db('userinfo'),
+            next: function() {
+                this.o.phone = this.u.phone;
+                this.o.type = 4;
+                this.o.code = $('#code').val();
+                AJAX.POST('/common/sms/checkMsg', this.o, function (a) {
+                    if (a.code == 1) {
+                        Comm.go('bindTel.html');
+                    } else {
+                        Comm.message(a.msg);
+                    }
+                });
+            },
+
+            yzm: function(a) {
+                var time = 60;
+                settime();
+                this.getCode(a, 1);
+                Comm.message('验证码已发送!');
+
+                function settime() {
+                    var yzm = $("#yzm");
+                    if (time == 0) {
+                        yzm.text("获取验证码");
+                        yzm.css("background-color", "#FFFFFF");
+                        yzm.css("border-color", "#E30008");
+                        yzm.css("color", "#E30008");
+                        yzm.removeAttr("disabled");
+                        return;
+                    } else {
+                        yzm.removeClass("bg_trans");
+                        yzm.text(time + "S重新发送");
+                        yzm.css("background-color", "#EDEDED");
+                        yzm.css("border-color", "#EDEDED");
+                        yzm.css("color", "#B3B3B3");
+                        yzm.attr("disabled", "disabled");
+                        time--;
+                    }
+                    setTimeout(function () {
+                        settime()
+                    }, 1000)
+                }
+            },
+            //获取验证码
+            getCode: function(t) {
+                this.o.vtype = 1; //1：注册 2：找回密码  5：手机验证
+                this.o.phone = this.u.phone;
+                AJAX.POST('/common/sms/send', this.o, function (a) {
+
+                });
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>病例</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+        .searchBar {
+            height: 30px;
+            margin: 7px 15px;
+            margin-right: 0px;
+            line-height: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .cell {
+            padding: 15px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+        }
+
+        .backGround {
+            background: url("img/bg_case.png") no-repeat center center;
+            background-size: 100% 100%;
+            padding: 10px 15px;
+        }
+
+        .backGround div {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle">病例</div>
+    </div>
+
+    <div class="flex_start bg_lgray">
+        <div class="headItem flex1">
+            <div class="searchBar bg_white pr10  pl10">
+                <input id="id_search" type="search" class="mainH mainW bg_white f14" placeholder="请输入搜索关键词">
+            </div>
+        </div>
+        <div class="navItem mr10 ml10 f15 col_theme" onclick="searchSubmit();">搜索</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="page mescroll chatroom" id="refreshId0">
+
+    <div class="list bg_white">
+        <ul id="id_list0">
+            <!--列表-->
+
+        </ul>
+    </div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script type="text/javascript" src="js/z.js"></script>
+<script type="text/javascript" src="js/g.js"></script>
+<script type="text/javascript" src="js/comm.js"></script>
+<script type="text/javascript" src="js/art-template.js"></script>
+<script type="text/javascript" src="inc/mescroll/mescroll.min.js"></script>
+
+
+<script>
+
+    var merefresh = null;
+
+    function pageload() {
+        addrefresh();
+    }
+
+
+    //添加刷新控件
+    function addrefresh() {
+
+        if (!merefresh) {
+            merefresh = new MERefresh();
+
+            merefresh.refreshOption.refreshUrl = '/api/orders/list';
+            merefresh.refreshOption.noMoreSize = 2;
+            merefresh.refreshOption.refreshParm = {};
+
+            //页面 <刷新> 的回调
+            merefresh.refreshOption.refresh_cb = function (refresh, d) {
+                if (d.code == 1) {
+                    var list = d.data || [];
+                    refresh.successEndRef(list.length, d.totalCount || 0);
+                    refresh.appendHtml(template('chatListId', list));
+                } else {
+                    Comm.message(d.msg);
+                }
+            };
+
+            merefresh.configurationDone('refreshId0', 'id_list0');
+
+        } else {
+            merefresh.successEndRef(0, 0);
+            var loadEle = $('#id_list0');
+            app.loading(loadEle);
+            merefresh.refreshFunction();
+        }
+
+    }
+
+
+    function searchSubmit() {
+        var searchText = $('#id_search').val();
+        merefresh.refreshOption.refreshParm = {
+            paname:searchText
+        };
+        addrefresh();
+    }
+
+
+</script>
+
+
+<script type="text/html" id="chatListId">
+
+    {{each $data as model i}}
+    <div class="cell" onclick="Comm.go('caseDetail.html?oid={{model.ordersid}}')">
+
+        <div class="backGround">
+            <div>就诊人：{{model.name||''}}</div>
+            <div>诊 所：{{model.clinicname||''}}</div>
+            <div>医 生：{{model.docname||''}}</div>
+            <div>时 间：{{formatDate(model.subdate,'Y-m-d H:i')}}</div>
+        </div>
+
+    </div>
+    {{/each}}
+
+</script>
+
+
+</body>
+
+</html>

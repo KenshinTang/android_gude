@@ -1,0 +1,149 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>设置</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .boldb {
+            border-bottom: 1px solid #eee;
+            line-height: 55px;
+            width: 100%;
+        }
+
+        .indicator{
+            background-image: url("stIconfile/identi_dg.png");
+            background-position: right 15px center;
+            padding-right: 25px;
+            background-size: 9px auto;
+        }
+
+        .swich{
+            background: url("img/swich_off.png") no-repeat center center;
+            background-size: 100%;
+            width: 45px;
+            height: 24px;
+        }
+        .swich.active{
+            background-image: url("img/swich_on.png");
+        }
+
+        .signOut{
+            border-radius: 25px;
+        }
+
+        .userLoginShow{
+            display: none;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="androidback()"></div>
+        <div class="navTitle">设置</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+    <div class="marl20">
+
+        <div class="boldb indicator" onclick="Comm.go('aboutus.html')">
+            <div class="f16">关于我们</div>
+        </div>
+
+        <div class="boldb indicator" onclick="Comm.go('feedBack.html')">
+            <div class="f16">意见反馈</div>
+        </div>
+
+
+        <div class="boldb indicator" onclick="Comm.go('artical.html?aid=21')">
+            <div class="f16">用户协议</div>
+        </div>
+
+        <div class="boldb indicator" onclick="Comm.go('artical.html?aid=12')">
+            <div class="f16">隐私协议</div>
+        </div>
+
+        <div class="boldb indicator userLoginShow" onclick="if (app.needLoginCheck(true)) return;Comm.go('modifyLoginPsw.html')">
+            <div class="f16">修改密码</div>
+        </div>
+
+        <!-- <div class="boldb" onclick="Comm.go()">
+            <div class="flex_between">
+                <div class="f16">是否开启消息通知</div>
+                <div class="marr15 swich" onclick="swichClicked(this);"></div>
+            </div>
+        </div> -->
+
+    </div>
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+    <div class="bg_trans m10 col_white center lh50 f17 signOut userLoginShow" onclick="exitToken();app.clearUserData();Comm.goLogin();">退出登录</div>
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+
+<script>
+    function androidback() {
+        Comm.close();
+    }
+
+    function pageload() {
+        resetUI();
+    }
+
+    function pageresume() {
+        resetUI();
+    }
+
+
+    function resetUI() {
+        if (app.isLogin()){
+            $('.userLoginShow,.signOut').show();
+        } else {
+            $('.userLoginShow,.signOut').hide();
+        }
+
+        Comm.setPush('get',function (d) {
+            $('.swich').addClass('active');
+            $('.swich').removeClass('active');
+        })
+    }
+
+
+
+    function swichClicked(t) {
+        $(t).toggleClass('active')
+        Comm.setPush('set',1);
+    }
+
+
+
+
+
+</script>
+
+</body>
+
+</html>

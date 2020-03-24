@@ -1,0 +1,89 @@
+
+.xiaq_tb {
+    padding: 5px 0;
+    text-align: center;
+    border-top: 1px solid #dadada
+}
+
+
+.numb_box {
+    position: absolute;
+    z-index: 1000;
+    background: #f5f5f5;
+    width: 100%;
+    bottom: 0
+}
+
+.nub_ggg {
+    /*border: 8px solid #dadada;*/
+    border: 8px solid #D1D2D6;
+
+    overflow: hidden;
+    border-bottom: 0
+}
+
+.nub_ggg li {
+    width: 33.3333%;
+    padding: 4px;
+    float: left;
+    text-align: center;
+    font-size: 22px;
+}
+
+.nub_ggg li a {
+    display: block;
+    color: #000;
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.nub_ggg li a:active {
+    background: #e0e0e0
+}
+
+.nub_ggg li a.zj_x {
+    border-radius: 5px;
+    /*border-left: 8px solid #dadada;*/
+    /*border-right: 8px solid #dadada*/
+}
+
+.nub_ggg li span {
+    display: block;
+    color: #e0e0e0;
+    background: #e0e0e0;
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden
+}
+
+.nub_ggg li span.del img {
+    width: 30%
+}
+
+.fh_but {
+    position: absolute;
+    right: 0;
+    top: 12px;
+    font-size: 14px;
+    color: #20d81f
+}
+
+.spxx_shop {
+    background: #fff;
+    margin-left: 4.35%;
+    border-top: 1px solid #dfdfdd;
+    padding: 10px 0
+}
+
+.spxx_shop td {
+    color: #7b7b7b;
+    font-size: 14px;
+    padding: 10px 0
+}
+
+.mlr_pm {
+    margin-right: 4.35%
+}

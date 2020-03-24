@@ -1,0 +1,66 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+    
+
+    <title>keyboard</title>
+
+    <link rel="stylesheet" href="../../css/g.css">
+    <link rel="stylesheet" href="../../css/comm.css">
+    <link rel="stylesheet" href="slKeyboard.css">
+
+
+    <style>
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navItemIcon marr10"></div>
+        <div class="navTitle">设置</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+    <div class="testSpaceItem" onclick="SLKeyBoard.showKeyBoard();">显示</div>
+    <div class="testSpaceItem" onclick="SLKeyBoard.dissmissKeyBoard();">隐藏</div>
+
+    <div class="testSpaceItem"></div>
+
+    <div class="keyboard" id="key"></div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="../../js/z.js"></script>
+<script src="../../js/g.js"></script>
+<script src="../../js/comm.js"></script>
+<script src="../../js/api.js"></script>
+<script src="slKeyboard.js"></script>
+<!--<script src="../../inc/ewm/jquery-1.11.1.js"></script>-->
+
+<script>
+
+    SLKeyBoard.isKeyBoardPoint = true;
+    SLKeyBoard.init('key');
+
+</script>
+
+</body>
+
+</html>

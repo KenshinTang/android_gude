@@ -1,0 +1,215 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>预约失败</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/caculate/SLCaculate.css">
+
+    <style>
+        .statu {
+            margin: 50px auto 30px auto;
+        }
+
+        .statu .reson {
+            margin: 20px;
+            line-height: 20px;
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle">预约失败</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="bg_white">
+
+
+    <div class="statu">
+        <div class="flex_center">
+            <img src="img/fail.png" width="25" height="25" class="patient mr10">
+            <div class="f18">预约失败</div>
+        </div>
+        <div class="center reson col_sub999 f12">该时间段已经预约满啦，请选择其他时间段</div>
+
+    </div>
+
+
+    <div>
+
+        <style>
+            .calendar {
+                height: 180px;
+            }
+        </style>
+
+        <div class="p15 f16 bold">医生排班</div>
+
+        <div class="mainW calendar bg_place border"></div>
+
+
+        <div class="col_sub999 f12 p15">
+            预约规则：预约后到诊时间的2小时前可取消，若迟到讲移后至预
+            约时间最后一位看诊。
+        </div>
+
+    </div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+    <div class="bg_lgray m10 col_white center lh50 f17 submit" onclick="submitClicked(this);">重新预约</div>
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/caculate/SLCaculate.js"></script>
+
+<script>
+    var PageM = {
+        doctorId:Comm.query('did')||'',
+        clinicid:Comm.query('cid')||'',
+        orderModel:{}
+    };
+
+
+
+    function pageload(){
+        if (PageM.doctorId){
+            getCanOrderData();
+        }
+    }
+
+
+
+
+
+    //获取医生排班
+    function getCanOrderData() {
+
+        var params = {
+            doctorid: PageM.doctorId||'',
+            startdate: '2019-08-20',//开始日期
+            day: '10',//获取天数
+        }
+        app.loading($('.calendar'));
+
+        SLNetwork('get', '/api/doctor/appointlist', params, function (data) {
+            if (data.code == 1) {
+                var appointList = data.data || [];
+                var list = dealNetData(appointList);
+
+                var html = template('tp_id_caculate', {});
+                $('.calendar').html(html);
+                PageM.caculate = weeklyCalendar(list, {
+                    changeWeek: function (date) {
+                        console.log(date);
+                    },
+                    chooseDayTime: function (date,type,wkd) {
+
+
+                        var weeks_ch = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+                        var fullTimeStr = date+'（'+weeks_ch[wkd]+'）'+ ((type == 1) ? '下午' : '上午');
+
+
+                        PageM.orderModel = {
+                            targetdate:date,
+                            targettype:type,
+                            weekDay:wkd,
+                            doctorid:PageM.doctorId,
+                            cuspatientid:'',
+                            clinicid:PageM.clinicid,
+                            fullTimeStr:fullTimeStr,
+                        }
+
+
+                        if (type == 0){
+                            console.log(date + ' 上午');
+                        } else if (type == 1){
+                            console.log(date + ' 下午');
+                        }
+                        $('.submit').addClass('bg_trans');
+                    }
+
+
+                }, false);
+
+            } else {
+                app.loadFail($('.calendar'));
+                Comm.message(data.msg);
+            }
+        });
+    }
+
+
+    //点击立即预约
+    function submitClicked(o) {
+
+        if (!app.needLoginCheck(1)){
+            if ($(o).hasClass('bg_trans') && PageM.orderModel){
+                Comm.db('cuspatM',null);
+                Comm.db('orderM',PageM.orderModel);
+                Comm.go('appointmentSure.html?skip=1');
+            } else {
+                Comm.message('请选择预约日期');
+            }
+        }
+    }
+
+
+
+    function failReload(){
+        getCanOrderData();
+    }
+
+
+</script>
+
+<script type="text/html" id="tp_id_caculate">
+    <div class="week_content bg_lgray">
+        <div class="week_title flex_between bg_lgray" id="id_week_title" ids="0">
+            <a href="javascript:void(0)" id="prevWeek" class="prevWeek pl15">上页</a>
+            <div id="showDate"></div>
+            <a href="javascript:void(0)" id="nextWeek" class="nextWeek pr15">下页</a>
+        </div>
+
+        <div class="m1">
+            <!--周日至周六-->
+            <div class="week_box">
+                <ul class="flex_around" id="weekUl"></ul>
+            </div>
+
+            <!--日历排班-->
+            <div class="calendar_box flex_around" id="calendarBox"></div>
+        </div>
+    </div>
+</script>
+
+</body>
+
+</html>

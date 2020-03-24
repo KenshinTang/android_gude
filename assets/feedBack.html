@@ -1,0 +1,185 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>意见反馈</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+
+        .cell {
+            padding: 15px 15px;
+            background-color: white;
+            margin-bottom: 10px;
+        }
+
+        .headItem {
+            line-height: 44px;
+            height: 44px;
+        }
+
+        /* upimg 图片多选 S*/
+        .up-Img .box {
+            background-color: unset;
+            width: 65px;
+            height: 65px;
+            margin-right: 12px;
+            margin-top: 12px;
+            float: left;
+            border-radius: 5px;
+            position: relative;
+            line-height: unset;
+        }
+
+        .box, #upload {
+            width: 65px;
+            height: 65px;
+        }
+
+        .box img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .upimg-del {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            background: 10px center no-repeat url(img/delete_red.png);
+            background-size: 20px 20px;
+        }
+
+        .inputArea {
+            width: 100%;
+            min-height: 80px;
+            height: 150px;
+        }
+
+        /* upimg 图片多选 S*/
+
+        .submit {
+            border-radius: 25px;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+<header>
+
+    <div class="navBar udLine">
+        <div class="headItem navTitles">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="f17" style="padding-right:40px">意见反馈</div>
+        </div>
+    </div>
+
+</header>
+<section class="bg_lgray">
+
+    <div class="bg_white cell m15 br5">
+        <textarea id="id_textArea" class="f15 inputArea" placeholder="请输入反馈内容"></textarea>
+
+
+        <div class="">
+            <div class="up-Img ohide">
+                <div id="imgList"></div>
+
+
+                <div class="btn box">
+                    <div class="up-upBtn" id="subbutton">
+                        <img class="fullImg" src="img/camera.png" height="65" alt="">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="boldb p10 bg_white m15 br3">
+        <input id="id_contact" type="text" placeholder="请输入手机号/邮箱" class="mainW lh25 f16"/>
+    </div>
+
+
+</section>
+
+<footer>
+    <div class="bg_trans m10 col_white center lh50 f17 submit" onclick="feedBackSubmit();">提交</div>
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/upimg/upload.js"></script>
+
+<script type="text/javascript">
+
+    var PageUpimgModel = {
+        maxImgCount: 8,
+        curCount: 0,
+        upimg: null,
+    };
+
+    function pageload() {
+        PageUpimgModel.upimg = new imgUploader("imgList", PageUpimgModel.maxImgCount, "subbutton");
+    }
+
+
+    function feedBackSubmit() {
+
+        var imgs = PageUpimgModel.upimg.imgList.join(',');
+
+
+        var requestParms = {
+            message : $('#id_textArea').val(),
+            img : imgs,
+            phone : $('#id_contact').val(),
+        };
+
+        if (!requestParms.message){
+            Comm.message('请填写反馈内容');
+            return;
+        } else if (!requestParms.phone){
+            Comm.message('请输入联系方式');
+            return;
+        }
+
+        Comm.loading('正在提交反馈...');
+        SLNetwork('post', '/api/feedback/save', requestParms, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                Comm.message('反馈成功,感谢您的意见或建议.');
+                setTimeout(function () {
+                    Comm.close();
+                }, 300)
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

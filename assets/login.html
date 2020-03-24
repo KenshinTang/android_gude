@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+    <link rel="stylesheet" href="css/g.css"/>
+    <link rel="stylesheet" href="css/comm.css"/>
+    <style>
+        section > div,
+        section > button,
+        footer > button {
+            width: 85%;
+            margin: 0 auto;
+            border-radius: 22px;
+        }
+
+        .cellDiv {
+            height: 50px;
+            line-height: 50px;
+            color: #111;
+        }
+
+        section > div input {
+            width: 90%;
+            height: 30px;
+            font-size: 16px;
+            color: #111;
+            padding-left: 30px;
+            background-repeat: no-repeat;
+            background-size: auto 16px;
+            background-position: left center;
+        }
+
+        section > div > input::-webkit-input-placeholder {
+            line-height: 21px;
+            color: #C7C7CD;
+        }
+
+        .ph input {
+            background-image: url('img/tel.png');
+        }
+
+        .code input {
+            background-image: url('img/code.png');
+        }
+
+        .pw input {
+            background-image: url('img/lock.png');
+        }
+
+        section > button,
+        footer > button {
+            margin-top: 28px;
+            display: block;
+            height: 44px;
+            color: #fff;
+            font-size: 17px;
+            text-align: center;
+            line-height: 44px;
+        }
+
+        .pw i,
+        .ph i {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            padding: 0 5px;
+            width: 30px;
+        }
+
+        .ph i > img,
+        .pw i > img {
+            vertical-align: middle;
+        }
+
+        .skip img {
+            width: 87px;
+            height: 78px;
+        }
+
+        .register > span {
+            color: #27b2ff;
+        }
+
+        .code > input {
+            width: 60%;
+        }
+
+        .code > button {
+            color: #fff;
+            padding: 0px 10px;
+            height: 30px;
+            float: right;
+            line-height: 30px;
+            font-size: 14px;
+            margin-top: 10px;
+            border-radius: 15px;
+        }
+
+        .eye {
+            width: 20px;
+        }
+
+        .meauItem {
+            margin: 30px 0px;
+        }
+
+        .meauItem.active {
+            font-weight: bold;
+            position: relative;
+        }
+
+        .meauItem.active:after {
+            height: 4px;
+            width: 50%;
+            position: absolute;
+            left: 25%;
+            margin: auto;
+            bottom: -5px;
+            background-color: #EF5F1E;
+            display: block;
+            content: ' ';
+        }
+
+        .showClass.pswLogin .codeCell, .showClass.codeLogin .pawCell {
+            display: none;
+        }
+
+        .wxIcon {
+            margin-bottom: 55px;
+            width: 60px;
+            height: 60px;
+            background: url("img/wx.png") no-repeat center;
+            background-size: 60px;
+        }
+
+        .autoSpace {
+            width: 50px;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+
+<div class="flex_center mainH mainW alertCt hide">
+
+    <div class="showAlert flex flexItem_between flexItem_v center">
+
+
+        <div class="alertTT">title</div>
+        <div class="alertMessage">message</div>
+        <div class="alertOptionBar flex_between">
+            <div class="alertOption cancel" onclick="sureClicked(false)">暂不使用</div>
+            <div class="alertOption sure" onclick="sureClicked(true);">同意</div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<header>
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon ml5" onclick="Comm.godismiss(4);"></div>
+        <div class="navTitle"></div>
+    </div>
+</header>
+
+<section class="content relative">
+
+    <!--<div class="center">-->
+
+        <div class="flex_center meauBar">
+            <div class="f24 meauItem active">账号登录</div>
+            <div class="autoSpace baseWH"></div>
+            <div class="f24 meauItem marl30">验证码登录</div>
+        </div>
+
+
+        <div class="showClass pswLogin">
+
+
+            <!--手机号-->
+            <div class="cellDiv ph bottomBorder">
+                <input id="phone" value="" name="phone" type="tel" placeholder="请输入11位手机号码" maxlength="11"/>
+            </div>
+
+            <!--密码-->
+            <div class="cellDiv pw mt5 relative bottomBorder pawCell">
+                <input type="password" value="" name="password" id="password" placeholder="请输入6位以上密码"
+                       maxlength="20"/>
+                <i>
+                    <img onclick="app.checkimg(this)" class="imgContain eye" src="img/eye_n.png">
+                </i>
+            </div>
+
+
+            <!--验证码-->
+            <div class="cellDiv code mt5 bottomBorder codeCell">
+                <div class="leftText lIcon code"></div>
+                <input placeholder="请输入验证码" type="tel" class="f16" name="vcode" id="code" maxlength="6"
+                       value=""/>
+                <button id="yzm" type="button" onclick="app.timeCountDown(this,$('#phone').val(),2);"
+                        class="bg_trans code-btn col_white f12">验证码
+                </button>
+
+            </div>
+
+            <div class="h40 baseWH codeCell"></div>
+
+
+            <div class="flex_between mart20 pawCell">
+                <span class="col_lgray login_forget" onclick="Comm.go('forget.html')">忘记密码?</span>
+                <div>
+                    <span class="col_lgray login_account">新用户?</span>
+                    <span class="col_red login_account" onclick="Comm.go('reg.html')">注册</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <button type="button" class="commitBtn bg_trans" onclick="subMitClicked()" class="sign-btn">登录</button>
+
+
+    <!--</div>-->
+</section>
+
+
+<footer class="flex_center bg_clear">
+    <div class="wxIcon" onclick="wxLogin();"></div>
+</footer>
+
+</body>
+<script type="text/javascript" src="js/g.js"></script>
+<script type="text/javascript" src="js/z.js"></script>
+
+<script type="text/javascript" src="js/comm.js"></script>
+<script type="text/javascript" src="js/api.js"></script>
+
+<script type="text/javascript">
+
+    if (config.SLTest) {
+        // $('#phone').val('13888888888');
+        // $('#password').val('123456');
+    }
+
+    var logintype = 1,agree = false;
+
+    function pageload() {
+        LoginModel.showLastLogin();
+        LoginModel.registTopBarMeau();
+        showYS();
+    }
+
+
+    function pageresume() {
+        LoginModel.showLastLogin();
+    }
+
+
+    //提交
+    function subMitClicked() {
+
+        if (!checkAgree()) return;
+
+        var url = '/api/customer/login';
+        var params = Check.getParms('POST');
+
+
+        if (!SLValid.isValidTel(params.phone)) {
+            Comm.message('请输入正确的手机号');
+            return;
+        }
+
+        if (logintype == 2) {
+            if (!SLValid.isValidCode(params.vcode)) {
+                Comm.message('请填写正确的验证码(6位)');
+                return;
+            }
+            params.password = '';
+            // delete params['password'];
+        } else {
+            if (!SLValid.isValidPassword(params.password)) {
+                Comm.message('请输入正确的密码');
+                return;
+            }
+        }
+
+        Comm.loading('正在登录...');
+        SLNetwork('post', url, params, function (a) {
+            Comm.loading();
+            if (a.code == 1 || a.code == 2) {
+                {
+                    Comm.message('登录成功');
+                    app.saveUserinfo(a.data);
+                    regPush();
+                }
+                setTimeout(function () {
+                    Comm.gotop('index.html');
+                }, 200);
+            } else {
+                Comm.message(a.msg);
+            }
+        });
+    }
+
+
+    function wxLogin() {
+
+        if (!checkAgree()) return;
+
+
+        Comm.extLogin({type: 1}, function (params) {
+
+            if (params.code == 1) {
+                Comm.loading('正在登录...');
+                SLNetwork('post', '/api/customer/weichatlogin', params, function (a) {
+
+                    Comm.loading();
+                    if (a.code == 1 || a.code == 2) {
+                        {
+                            var model = a.data;
+                            if (!model.phone) {
+                                Comm.db('bindTempModel', model);
+                                Comm.go('bindTel.html');
+                            } else {
+                                app.saveUserinfo(a.data);
+                                regPush();
+                                Comm.message('登录成功');
+                                setTimeout(function () {
+                                    Comm.gotop('index.html');
+                                }, 200);
+                            }
+                        }
+
+                    } else {
+                        Comm.message(a.msg);
+                    }
+                });
+            }
+
+        });
+
+    }
+
+
+    function androidback() {
+
+    }
+
+
+    var LoginModel = new function () {
+
+
+        this.showLastLogin = function () {
+            var tel = Comm.db('account');
+            if (!$('#phone').val()) {
+                $('#phone').val(tel);
+            }
+        }
+
+
+        this.registTopBarMeau = function () {
+            meauChooseClick('.meauBar', '.meauItem', function (o, idx) {
+                logintype = idx + 1;
+                if (idx == 0) {
+                    $('.showClass').removeClass('codeLogin');
+                    $('.showClass').addClass('pswLogin');
+                    $('.wxIcon').removeClass('hide');
+                } else {
+                    $('.showClass').removeClass('pswLogin');
+                    $('.showClass').addClass('codeLogin');
+                    $('.wxIcon').addClass('hide');
+                }
+            })
+        }
+
+    };
+
+
+    function showYS() {
+        //根据id获取广告详情
+
+        if (Comm.db('agree')) {
+            return;
+        }
+
+        console.log('getAdverWithAid');
+        config.notDeal = true;
+        var params = {
+            articleid: 12
+        }
+        SLNetwork('get', '/api/article/info', params, function (data) {
+
+            if (data.code == 1) {
+                var model = data.data;
+
+                $('.alertTT').html(model.articlename);
+                $('.alertMessage').html(model.section);
+                $('.alertCt').removeClass('hide');
+
+            } else {
+
+            }
+        });
+    }
+
+    function sureClicked(agr){
+        agree = agr;
+        if (agree) {
+            Comm.db('agree',true);
+        }
+        $('.alertCt').toggleClass('hide');
+    }
+
+    function checkAgree() {
+        if (!Comm.db('agree')){
+            showYS();
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+    // var model = {
+    //     o: {},
+    //     u: Comm.db('userinfo'),
+    //     next: function() {
+    //         this.o.phone = this.u.phone;
+    //         this.o.type = 4;
+    //         this.o.code = $('#code').val();
+    //         AJAX.POST('/common/sms/checkMsg', this.o, function (a) {
+    //             if (a.code == 1) {
+    //                 Comm.go('bindTel.html');
+    //             } else {
+    //                 Comm.message(a.msg);
+    //             }
+    //         });
+    //     },
+    //
+    //     yzm: function(a) {
+    //         var time = 60;
+    //         this.getCode(a, 1);
+    //     },
+    //     //获取验证码
+    //     getCode: function(t) {
+    //         this.o.vtype = t; //类型 1注册 2登录 3修改密码 4修改交易密码 5修改手机号
+    //         this.o.phone = this.u.phone;
+    //         AJAX.POST('/api/customer/getvcode', this.o, function (a) {
+    //             Comm.message('验证码已发送!');
+    //             function settime() {
+    //                 var yzm = $("#yzm");
+    //                 if (time == 0) {
+    //                     yzm.text("获取验证码");
+    //                     yzm.css("background-color", "#FFFFFF");
+    //                     yzm.css("border-color", "#E30008");
+    //                     yzm.css("color", "#E30008");
+    //                     yzm.removeAttr("disabled");
+    //                     return;
+    //                 } else {
+    //                     yzm.removeClass("bg_trans");
+    //                     yzm.text(time + "S重新发送");
+    //                     yzm.css("background-color", "#EDEDED");
+    //                     yzm.css("border-color", "#EDEDED");
+    //                     yzm.css("color", "#B3B3B3");
+    //                     yzm.attr("disabled", "disabled");
+    //                     time--;
+    //                 }
+    //                 setTimeout(function () {
+    //                     settime()
+    //                 }, 1000)
+    //             }
+    //         });
+    //     }
+    // }
+
+
+</script>
+
+</html>

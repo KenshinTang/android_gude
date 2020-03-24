@@ -1,0 +1,594 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>小石头的测试页面</title>
+
+    <style>
+
+        .boldb {
+            border-bottom: 1px solid #eee;
+            line-height: 50px;
+            width: 100%;
+        }
+
+        .boldb span {
+            width: 100px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .boldb input {
+            text-align: left;
+            font-size: 15px;
+            height: 30px;
+            width: 65%;
+        }
+
+        .boldb textarea {
+            text-align: left;
+            font-size: 15px;
+            height: 80px;
+            margin-top: 10px;
+            width: 65%;
+        }
+
+        .footerInput {
+            background-color: #E4E4E4;
+            padding: 10px;
+        }
+
+        .footerInput input {
+            height: 40px;
+            width: 100%;
+            margin: 0px 10px;
+        }
+
+        input {
+            border-radius: 5px;
+        }
+
+    </style>
+
+
+    <style>
+
+        body, html {
+            padding: 0px;
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .SLHeader {
+            background-color: red;
+        }
+
+        .SLSection {
+            flex: 1;
+            overflow-y: scroll !important;
+            overflow-x: hidden !important;
+            -webkit-transform: translateZ(0);
+            -webkit-overflow-scrolling: touch !important;
+            background-color: #E1E1E1;
+        }
+
+        .SLFooter {
+            background-color: green;
+        }
+
+        .navBar {
+            background-color: white;
+            width: 100%;
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .navBack, .navItem {
+            line-height: 44px;
+            height: 44px;
+        }
+
+        .navBackIcon {
+            height: 100%;
+            width: 40px;
+            height: 44px;
+            background: url("img/back_b.png");
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: auto 16px;
+            background-position-x: 10px;
+            float: left;
+        }
+
+        .navItem {
+            background-position: right;
+            float: right;
+            background-size: 20px auto;
+        }
+
+        .navTitle {
+            margin: 0px 60px; /*text-overflow:ellipsis;*//*white-space:nowrap;*/
+            overflow: hidden;
+            height: 44px;
+            line-height: 44px;
+            font-size: 18px;
+            text-align: center;
+            color: #242829;
+        }
+
+    </style>
+
+
+    <style>
+        /****************************{flex}*****************************/
+
+        .flex_wrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .flex_start {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .flex_between {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex_around {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .flex_center {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flexItem_between {
+            justify-content: space-between;
+        }
+
+        .flexItem_start {
+            justify-content: start;
+        }
+
+        .flexItem_around {
+            justify-content: space-around;
+        }
+
+        .flexItem_v {
+            flex-direction: column;
+
+            /*display: flex;*/
+            /*flex-wrap: nowrap;*/
+            /*flex-direction: column;*/
+            /*justify-content: space-around;*/
+            /*align-items: center;*/
+        }
+
+        .flexItem_h {
+            flex-direction: row;
+        }
+
+        .flexItem_wrap {
+            flex-wrap: wrap;
+        }
+
+        .flexItem_nowrap {
+            flex-wrap: nowrap;
+        }
+
+        .flexItem_center_js {
+            justify-content: center;
+        }
+
+        .flexItem_center_al {
+            align-items: center;
+        }
+
+        .flexItem_reverse_R {
+            flex-direction: row-reverse;
+        }
+
+        .flex1 {
+            flex: 1;
+            /*flex-grow: 1;*/
+        }
+
+        .flex15 {
+            flex: 1.5 !important;
+        }
+
+        .grow1 {
+            flex: 1;
+        }
+
+        .grow2 {
+            flex: 2;
+        }
+
+        .grow3 {
+            flex: 3;
+        }
+
+        .grow4 {
+            flex: 4;
+        }
+
+        /*********************************************************/
+    </style>
+
+    <style>
+        .marr10 {
+            margin-right: 10px;
+        }
+
+        .marl20 {
+            margin-left: 20px;
+        }
+
+        input {
+            caret-color: red !important;
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body class="SLPage flex flexItem_v flexItem_between">
+
+
+<!--******************************************************************************-->
+
+
+<div class="SLHeader">
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon" onclick="callNative('close',1)"></div>
+        <div class="navItem marr10" onclick="reloadPage(true);">刷新</div>
+        <div class="navItem marr10" onclick="reset();">重置</div>
+        <div class="navTitle" onclick="callNative('go','zzzztest.html')">当前计数</div>
+    </div>
+</div>
+
+
+<div class="SLSection scroll-y">
+
+
+    <div class="flex_center">
+        <div class="">fdasf</div>
+        <div class="">fdasf</div>
+
+    </div>
+
+
+
+    <div class="marl20">
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <textarea placeholder="textarea">测试输入框测试输入框测试输入框测试输入框测试输入框</textarea>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <textarea placeholder="textarea">测试输入框测试输入框测试输入框测试输入框测试输入框</textarea>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">测试输入框</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+    </div>
+
+</div>
+
+
+<!--******************************************************************************-->
+<div class="SLFooter">
+
+    <div class="footerInput flex_between">
+        <input class="flex1" type="text" value="" placeholder="请输入"/>
+        <div class="p10 br5 bg_trans" onclick="pageBlur();">发送</div>
+    </div>
+
+
+</div>
+
+<script src="js/z.js"></script>
+
+<script>
+    function reloadPage(reload) {
+        var times = parseInt(localStorage.getItem('tag') || 0);
+        times += 1;
+        localStorage.setItem('tag', times);
+        if (reload) {
+            location.reload();
+        }
+    }
+
+    function reset() {
+        var times = 1;
+        localStorage.setItem('tag', times);
+        $('.navTitle').text('当前计数' + times);
+    }
+
+    window.onload = function () {
+        var times = parseInt(localStorage.getItem('tag') || 0);
+        localStorage.setItem('tag', times);
+        $('.navTitle').text('当前计数' + times);
+
+        var ss = $('span');
+        ss.forEach(function (ele, idx) {
+            $(ele).text('测试输入框' + idx);
+        })
+    };
+
+
+    function pageBlur() {
+        callNative('message', 'pageBlur');
+        document.activeElement.blur();
+    }
+
+
+    function showCurrentActiveEle() {
+
+        SLActiveEleAutoVisualRange();
+        return;
+        var scrollTime;
+        if (SLDevice.GetDeviceType() == 4 || SLDevice.GetDeviceType() == 1) {
+            var num = 0;
+            var skipNum = 7;
+            scrollTime = setInterval(function () {
+                timerId = true;
+                var showTop = SLActiveEleAutoVisualRange();
+                if ($('.SLSection').scrollTop() == showTop) {
+                    num = skipNum;
+                }
+                if (num < skipNum) {
+                    num++;
+                } else {
+                    clearInterval(scrollTime);
+                    $('.SLSection').scrollTop(showTop);
+                    return;
+                }
+
+                callNative('message', showTop);
+                $('.SLSection').scrollTop(showTop);
+                console.log('num=' + num);
+                console.log('showTop=' + showTop);
+            }, 50)
+        }
+    }
+
+
+    function SLActiveEleAutoVisualRange(get) {
+        var ActiveEle = document.activeElement;
+
+        var activeH = document.activeElement.scrollHeight;
+        var activeTop = ActiveEle.offsetTop;//ok
+        var activeBottom = ActiveEle.offsetTop + activeH;//ok
+
+        var safeArea_top = $('.SLSection').scrollTop();//ok
+        var safeArea_bottom = $('.SLSection').height() + safeArea_top;//ok
+
+        var showTop = activeTop - safeArea_bottom + safeArea_top + activeH;//ok
+        showTop = showTop <= 0 ? 0 : showTop;
+
+        if (activeTop > safeArea_top && activeBottom <= safeArea_bottom) {
+            return showTop;
+        } else {
+            $('.SLSection').scrollTop(showTop);
+        }
+        ActiveEle.focus();
+
+        return showTop;
+    }
+
+</script>
+
+
+<script class="SLdevice">
+
+    var SLDeviceType = {
+        DeviceType_IOS: 1,
+        DeviceType_Android: 2,
+        DeviceType_WeiXin: 3,
+        DeviceType_IOS_Mix: 4,
+        DeviceType_Android_Mix: 5,
+        DeviceType_Other: 6,
+    }
+
+    var SLDevice = new function () {
+        var device = this;
+
+        device.GetDeviceType = function () {
+            var u = navigator.userAgent;
+
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; // Android
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);             // iOS
+            var isWx = navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
+
+            if (isMix()) {
+                if (isiOS) {
+                    return SLDeviceType.DeviceType_IOS_Mix;
+                } else if (isAndroid) {
+                    return SLDeviceType.DeviceType_Android_Mix;
+                } else if (isWx) {
+                    return SLDeviceType.DeviceType_WeiXin;
+                } else {
+                    return SLDeviceType.DeviceType_Other;
+                }
+            } else {
+                if (isiOS) {
+                    return SLDeviceType.DeviceType_IOS;
+                } else if (isAndroid) {
+                    return SLDeviceType.DeviceType_Android;
+                } else if (isWx) {
+                    return SLDeviceType.DeviceType_WeiXin;
+                } else {
+                    return SLDeviceType.DeviceType_Other;
+                }
+            }
+        }
+
+        function isMix() {
+            return (window['WeiLai'] || (window.webkit != null && window.webkit.messageHandlers != null && window.webkit.messageHandlers.WeiLai != null));
+        };
+    }
+
+
+</script>
+
+
+<script class="ReactNative">
+
+    function callNative(m, d) {
+        if (SLDevice.GetDeviceType() == SLDeviceType.DeviceType_IOS_Mix) {
+            var data = {
+                method: m + ((d === null || !d) ? '' : ':')
+            };
+            if (d) data['data'] = toStr(d || '');
+            window.webkit.messageHandlers.WeiLai.postMessage(data);
+        } else if (SLDevice.GetDeviceType() == SLDeviceType.DeviceType_Android) {
+            if (window.WeiLai && (typeof window.WeiLai[m] === typeof
+                function () {
+                })) {
+                if (d === null)
+                    window.WeiLai[m]();
+                else
+                    window.WeiLai[m](toStr(d));
+            }
+        }
+    }
+
+    //对象转str
+    function toStr(o) {
+        if (typeof(o) == typeof({}))
+            return JSON.stringify(o);
+        return o;
+    }
+
+</script>
+
+
+<script class="Window">
+
+    document.addEventListener('focusin', function () {
+
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+            showCurrentActiveEle();
+        }
+
+        setTimeout(function () {
+            $('.SLSection').on('scroll', function () {
+                pageBlur();
+            })
+        }, 500);
+    });
+
+    document.addEventListener('focusout', function () {
+        $('.SLSection').unbind('scroll');
+    });
+
+
+    window.addEventListener('resize', function () {
+        if (
+            document.activeElement.tagName === 'INPUT' ||
+            document.activeElement.tagName === 'TEXTAREA'
+        ) {
+            showCurrentActiveEle();
+        }
+    });
+
+</script>
+
+
+</body>
+
+</html>

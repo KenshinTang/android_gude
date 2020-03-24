@@ -1,0 +1,131 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>绑定手机号</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .getCode {
+            color: white;
+            border-radius: 15px;
+            line-height: 30px;
+            padding: 0px 10px;
+            text-align: center;
+        }
+
+        .submit {
+            margin: 100px 10px;
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="navTitle">绑定手机号</div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="bg_lgray">
+
+        <div class="topCt paddt30 paddb30 paddl20 paddr20 lh20 f16">
+            <div class="col_sub">输入您的手机号:</div>
+        </div>
+
+
+        <div class="bg_white flex_between p10 bottomBorder pl15">
+            <div class="flex_start">
+                <div class="baseWH">
+                    <img src="img/tel.png" height="16" alt="">
+                </div>
+                <input id="phone" type="tel" placeholder="请输入11位手机号" class="marg_h5 f15 lh40" name="phone" data-reg='m'
+                    maxlength="11">
+            </div>
+        </div>
+
+        <div class="bg_white flex_between p10 pl15">
+            <div class="flex_start">
+                <div class="baseWH">
+                    <img src="img/code.png" width="16" alt="">
+                </div>
+
+                <input type="tel" placeholder="请输入验证码" name="code" data-reg='c' class="marg_h5 f15 lh40" maxlength="6">
+            </div>
+
+
+            <button id="yzm" class="getCode bg_trans code-btn col_white f12"
+                onclick="app.timeCountDown(this,$('#phone').val(),1);">获取验证码</button>
+        </div>
+
+
+
+        <div class="submit bg_trans col_white f18 lh50 center br5" onclick="model.next()">完成</div>
+
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        var tempModel = Comm.db('bindTempModel');
+
+        function pageload() {
+
+        }
+
+
+        var model = {
+            next: function () {
+                var params = Check.submit('POST');
+                if (params) {
+                    Comm.loading('正在绑定...');
+                    params._token = tempModel.token;
+                    params.vtype = 5;
+                    params.vcode = params.code;
+                    SLNetwork('post', '/api/customer/checkvcode', params, function (d) {
+                        Comm.loading();
+                        if (d.code == 1) {
+                            SLNetwork('post', '/api/customer/bindphone', params, function (a) {
+                                Comm.loading();
+                                if (a.code == 1) {
+                                    app.saveUserinfo(a.data);
+                                    regPush();
+                                    setTimeout(function () {
+                                        Comm.gotop('index.html');
+                                    }, 200);
+
+                                } else {
+                                    Comm.message(a.msg);
+                                }
+                            });
+                        } else {
+                            Comm.message(d.msg);
+                        }
+                    })
+                }
+            },
+        }
+    </script>
+
+</body>
+
+</html>

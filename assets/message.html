@@ -1,0 +1,323 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>消息</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+        .cellSel {
+            width: 30px;
+            height: 30px;
+        }
+
+        .check {
+            background-image: url("img/agree_n.png");
+        }
+
+        .active.check {
+            background-image: url("img/sel_y.png");
+        }
+
+        .cellCt {
+            flex: 1;
+        }
+
+        .cellIcon {
+            height: 80px;
+            width: 80px;
+            /*flex-basis: 80px;*/
+        }
+
+        .bottomBar {
+            height: 55px;
+            padding: 0px 10px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+        .del {
+            width: 105px;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        .time {
+            word-break: break-all;
+            text-align: right;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div id="bj" class="navItem mr10" onclick="edit(this)">编辑</div>
+        <div class="navTitle">消息</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="page mescroll chatroom bg_lgray" id="refreshId0">
+
+    <div class="list">
+        <ul id="id_list0">
+
+
+
+
+        </ul>
+    </div>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+
+    <div id="foot" class="flex_between p10 bottomBar hide">
+        <div id="q" class="lIcon sall check">全选</div>
+        <div class="del bg_trans col_white br5" onclick="del()">删除</div>
+    </div>
+
+</footer>
+
+<script type="text/javascript" src="js/z.js"></script>
+<script type="text/javascript" src="js/g.js"></script>
+<script type="text/javascript" src="js/comm.js"></script>
+<script type="text/javascript" src="js/art-template.js"></script>
+<script type="text/javascript" src="inc/mescroll/mescroll.min.js"></script>
+
+<script>
+    var merefresh = new MERefresh();
+    var getMsgType = Comm.query('type');
+    var isEdit = false;
+
+    //所有消息存放的对象 - - 根据id获取对应的消息
+    var sourseDic = {};
+
+    function pageload() {
+        initCheck();
+        addrefresh();
+    }
+
+
+    //点击编辑完成
+    function edit(t) {
+        if ($(t).text() == '编辑') {
+
+            $(t).text('完成');
+            $('.bottomBar').removeClass('hide');
+            $('.cellSel').removeClass('hide');
+            isEdit = true;
+        } else {
+            editComplectUI();
+        }
+        Comm.resizeSection();
+    }
+
+    function editComplectUI() {
+        $('#bj').html('编辑');
+        $('.bottomBar').addClass('hide');
+        $('.cellSel').addClass('hide');
+        $('#foot').addClass('hide');
+        isEdit = false;
+        selectedAll(false);
+    }
+
+
+    //检查是否全选
+    function checkSall() {
+        if ($('.cellSel').length == $('.cellSel.active').length) {
+            selectedAll(true);
+        } else {
+            $('.sall').removeClass('active');
+        }
+    }
+
+
+    //添加刷新控件
+    function addrefresh() {
+        merefresh.refreshOption.refreshUrl = '/common/Message/list';
+        merefresh.refreshOption.refreshParm = {
+            MessageType: getMsgType,
+            userType: 1,
+        }
+        //页面 <刷新> 的回调
+        merefresh.refreshOption.refresh_cb = function (refresh, d) {
+            console.log(d);
+            var list = d.data || [];
+
+            refresh.successEndRef(list.length, d.totalCount||0);
+            var keyWord = 'messageid';
+
+            list.forEach(function (a) {
+                if (!a) return;
+                a.type = getMsgType;
+                sourseDic[a[keyWord]] = a;
+            });
+
+
+            {
+                if (d.code == 1) {
+                    var html = template('chatListId', list);
+                    merefresh.appendHtml(html);
+
+
+                    var listEle = $('.goodsTitle');
+
+                    listEle.forEach(function (ele,idx) {
+                        // var eleModel = list[idx];
+                       $(ele).text($(ele).text());
+                    });
+
+                } else {
+                    Comm.message(d.msg);
+                }
+                initCheck();
+                editComplectUI();
+            }
+
+        };
+
+        merefresh.configurationDone('refreshId0', 'id_list0');
+    }
+
+
+    function initCheck() {
+        checkBoxChoose('body', '.check', function (t, idx) {
+            var sall = $(t).hasClass('sall');
+            if (sall) {
+                var isSall = $(t).hasClass('active');
+                selectedAll(isSall);
+            } else {
+                checkSall();
+            }
+        })
+    }
+
+    function del() {
+        var parms = {}, tempList = [];
+        for (var i = 0; i < $('.cellSel').length; i++) {
+            if ($('.cellSel').eq(i).hasClass('active')) {
+                var messageId = $('.cellSel').eq(i).attr('messageid');
+                tempList.push(messageId);
+            }
+        }
+
+        if (!tempList.length) {
+            Comm.message('请选择要删除的商品');
+            return;
+        }
+
+        parms.ids = tempList.join(',');
+        console.log(parms.ids);
+
+
+
+        Comm.loading('正在删除...');
+        AJAX.POST('/common/Message/delids', parms, function (a) {
+
+            Comm.loading();
+            if (a.code == 1) {
+                var aa = $('.cellSel.active').parent();
+                aa.remove();
+                merefresh.successEndRef(0, 0);
+
+                Comm.message('删除成功');
+                var nowCell = $('.cellSel').parent() || [];
+                if (nowCell.length == 0) {
+                    merefresh.MeRefScroll.resetUpScroll();
+                }
+
+            } else {
+                Comm.message(a.msg);
+            }
+        })
+    }
+
+
+    function selectedAll(istrue) {
+        if (istrue) {
+            $('.check').addClass('active');
+        } else {
+            $('.check').removeClass('active');
+        }
+    }
+
+    function msgClicked(msgId) {
+        if (isEdit) return;
+
+        if (getMsgType == 2) {//
+
+        } else {
+
+        }
+
+        $('#' + msgId).find('.hasNew').remove();
+
+        Comm.go('artical.html?type=5&aid='+msgId);
+    }
+
+
+</script>
+
+
+<script type="text/html" id="chatListId">
+    {{each $data as model i}}
+
+    <div id="{{model.messageid}}" class="msCell flex_between m10" onclick="msgClicked({{model.messageid}})">
+        <div class="check lIcon cellSel hide" messageId="{{model.messageid}}"></div>
+        <div class="cellCt p10 bg_white br5">
+            <div class="flex_between mainW lh30">
+                <div class="flex_start">
+                    {{if model.isread == 1}}
+                    <div class="col_red f18 hide"></div>
+                    {{else}}
+                    <div class="col_red f18 hasNew">•</div>
+                    {{/if}}
+
+                    {{if model.type == 2}}
+                    <div class="statuText f16 bold baseWH">预约提示</div>
+                    {{else if model.type == 1}}
+                    <div class="statuText f16 bold baseWH">通知消息</div>
+                    {{/if}}
+
+
+                </div>
+                <div class="col_sub time baseWH f12">{{formatDate(model.messagedate)}}</div>
+            </div>
+
+            <div class="goods flex br5">
+                <div class="goodsInfo mt5">
+                    <div class="goodsTitle line2">
+                        {{getText(model.messagecontext||'')}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{/each}}
+</script>
+
+
+</body>
+
+</html>

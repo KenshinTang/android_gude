@@ -1,0 +1,197 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>扫描结果</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link href="inc/mescroll/mescroll.min.css" type="text/css" rel="stylesheet"/>
+
+    <style>
+        .doctor{
+            padding: 25px 15px;
+        }
+
+        .selHeader{
+            background-color: #FFE6DA;
+            padding: 15px 10px;
+            color: #EF5F1E;
+            line-height: 15px;
+        }
+
+        .patientCell{
+            padding: 20px 15px;
+            background-color: white;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon" onclick="androidback()"></div>
+        <div class="navItem mr10" onclick="Comm.go('addPatient.html')">新增</div>
+        <div class="navTitle">扫描结果</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="mescroll" id="mescroll">
+    
+    <div class="bold f18 doctor flex_start">
+        <div>主诊医生：</div>
+        <div class="name"></div>
+    </div>
+
+    <div class="selHeader">请选择就诊人</div>
+
+    <div class="list bg_lgray" id="listId"></div>
+
+
+    
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/mescroll/mescroll.min.js"></script>
+
+
+<script>
+
+    var key = Comm.query('key')||'',name = decodeURI(Comm.query('name')||'');
+    var merefresh = null;
+
+    function androidback() {
+        Comm.close();
+    }
+
+    function pageload() {
+        if (!key) {
+            Comm.message('错误的二维码信息');
+            return;
+        }
+        if (name){
+            $('.name').text(name);
+        }
+        addRefresh();
+
+        // setTimeout(function () {
+        //     Comm.resizeSection();
+        // },300);
+
+    }
+
+    function pageresume() {
+        checkNeedRefreshPage(function () {
+            merefresh.downRefresh();
+        })
+    }
+
+
+    function addRefresh() {
+        merefresh = new MERefresh();
+        //网络请求参数
+        merefresh.refreshOption.refreshUrl = '/api/cuspatient/list';
+
+        //页面 <刷新> 的回调
+        merefresh.refreshOption.refresh_cb = function (refresh, d) {
+            if (d.code == 1) {
+                var list = d.data || [];
+                refresh.successEndRef(list.length||0, d.totalCount||0);
+                refresh.appendHtml(template('tp_id_patient', list));
+            } else {
+                refresh.successEndRef(0, 0);
+                refresh.MeRefScroll.endUpScroll(true);
+            }
+        };
+        merefresh.configurationDone('mescroll', 'listId');
+    }
+
+
+    function addPointChoose(cid,pname) {
+
+        Comm.confirm('确定为'+(pname||'')+'进行挂号吗',function (idx) {
+            if (idx == 1){
+                var params = {
+                    cuspatientid:cid,
+                    scancode : key,
+                }
+
+                SLNetwork('get', '/api/appointment/scanappoint', params, function (data) {
+                    if (data.code == 1) {
+                        var oid = data.data||'';
+
+                        if (oid){
+                            Comm.go('appointmentComplect.html?oid='+oid);
+                        } else {
+                            Comm.close();
+                        }
+
+
+                        // Comm.confirm('是否查看订单',function (t) {
+                        //     if (t == 1){
+                        //
+                        //     } else {
+                        //         Comm.close();
+                        //     }
+                        // })
+
+                    } else {
+                        Comm.message(data.msg);
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+<script type="text/html" id="tp_id_patient">
+
+    {{each $data model i}}
+
+    <div class="patientCell" onclick="addPointChoose('{{model.cuspatientid}}','{{model.paname}}')">
+        <div class="flex_start f16">
+            <div class="bold name">{{model.paname||''}}</div>
+            <div class="tel ml10">{{sphone(model.paphone||'')}}</div>
+        </div>
+
+        <div class="f12">
+
+            <div class="flex_start margin_v">
+                <div class="marr25">性别：{{getGender(model.pasex)}}</div>
+                <div>身份证：{{model.paidcard||''}}</div>
+            </div>
+
+            <div>就诊号：{{model.cuspatientid}}</div>
+
+        </div>
+
+
+    </div>
+
+    {{/each}}
+
+</script>
+
+
+</body>
+
+</html>

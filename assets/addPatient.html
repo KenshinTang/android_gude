@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>就诊人</title>
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+    <link href="css/g.css" type="text/css" rel="stylesheet">
+    <link href="css/comm.css" type="text/css" rel="stylesheet">
+    <style>
+        .indicator {
+            background-image: url("stIconfile/identi.png");
+        }
+
+        .boldb {
+            border-bottom: 1px solid #eee;
+            line-height: 50px;
+            width: 100%;
+        }
+
+        .boldb span {
+            width: 100px;
+            display: inline-block;
+        }
+
+        .boldb img,
+        .boldb span {
+            vertical-align: middle;
+        }
+
+        .boldb input {
+            text-align: left;
+            font-size: 15px;
+            height: 30px;
+            width: 65%;
+        }
+
+        .boldb input[type=button] {
+            color: #CCCCCC;
+            background-color: white;
+            margin-right: 15px;
+            margin-top: 10px;
+            float: right;
+        }
+
+        .editIcon {
+            display: none;
+        }
+
+
+        .sureBtn {
+            width: 90%;
+            margin: 5px auto;
+            font-size: 16px;
+            text-align: center;
+            height: 45px;
+            line-height: 45px;
+            border-radius: 23px;
+            color: white;
+        }
+
+        body>footer {
+            z-index: 90;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="navItem f16 mr10 editIcon col_theme" onclick="deleteCellRecord()">删除</div>
+            <div class="navTitle"></div>
+        </div>
+    </header>
+    <section class="bg_lgray scroll-y">
+
+        <div class="bg_white formCt">
+
+        </div>
+
+    </section>
+
+    <footer>
+        <div class="sureBtn col_white bg_disable" onclick="savePatientInfo();">保存</div>
+    </footer>
+
+</body>
+
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/area.js"></script>
+<script src="js/picker.min.js"></script>
+<script src="js/art-template.js"></script>
+<script src="js/api.js"></script>
+
+<script type="text/javascript">
+    var tid = Comm.query('tid') || '';
+    var userinfo = Comm.db("userinfo"),
+        requestParms = {};
+    var PageM = {
+        datePicker: null,
+        genderPicker: null,
+    }
+
+    function pageload() {
+        initUI();
+        initPicker();
+    }
+
+    function initUI() {
+        if (tid) {
+            $('.navTitle').text('编辑就诊人');
+            getPaintentDetail();
+
+        } else {
+            $('.navTitle').text('添加就诊人');
+            $('.formCt').html(template('tp_id', {}));
+            $('.sureBtn').addClass('bg_theme');
+        }
+
+    }
+
+
+    function initPicker() {
+        var genderArr = [{
+            text: '男',
+            i: 1,
+        }, {
+            text: '女',
+            i: 2,
+        }];
+
+        PageM.genderPicker = new Commpicker("选择性别", [genderArr], function (a, v, sid) {
+            $('#gender').val(v);
+            $('#gender').attr('gender', sid);
+        });
+
+        PageM.datePicker = new Datepicker('请选择生日', function (a, v) {
+            $('#age').val(v);
+            requestParms.paage = v;
+        })
+    }
+
+
+    function savePatientInfo() {
+
+        if (!$('.sureBtn').hasClass('bg_theme')) return;
+
+        var type = Comm.query('type');
+        var ss = document.getElementById("name");
+
+        console.log(ss.value);
+        requestParms.paname = document.getElementById("name").value;
+        requestParms.paphone = document.getElementById("phone").value;
+        requestParms.paage = document.getElementById("age").value;
+        requestParms.paidcard = document.getElementById("idcard").value;
+
+        requestParms.pasex = parseInt($('#gender').attr('gender'));
+
+
+        if (!SLValid.isValidName(requestParms.paname)) {
+            Comm.message('请填写正确的姓名,不要输入特殊字符！');
+            return;
+        } else if (!SLValid.isValidTel((requestParms.paphone || ''))) {
+            Comm.message('请填写正确的手机号！');
+            return;
+        } else if (!requestParms.pasex) {
+            Comm.message('请选择性别！');
+            return;
+        } else if (!requestParms.paage) {
+            Comm.message('请选择出生日期！');
+            return;
+        } else if (!SLValid.isValidIDcard(requestParms.paidcard)) {
+            Comm.message('请填写正确的身份证号！');
+            return;
+        }
+
+        var api = '/api/cuspatient/add';
+        var loadText = '正在保存';
+        if (tid) {
+            api = '/api/cuspatient/edit';
+            requestParms.cuspatientid = tid;
+        }
+        Comm.loading(loadText);
+        SLNetwork('post', api, requestParms, function (a) {
+            Comm.loading();
+            if (a.code == 1) {
+                addNeedRefPage('scanSuccess');
+                setTimeout(function () {
+                    Comm.close();
+                }, 300);
+            } else {
+                a.msg && Comm.message(a.msg);
+            }
+        });
+
+
+        // AJAX.POST(api, requestParms, function (a) {
+        //
+        // });
+    }
+
+
+    function getPaintentDetail() {
+        var params = {
+            cuspatientid: tid
+        }
+
+        var loadEle = $('.formCt');
+
+        app.loading(loadEle);
+        SLNetwork('get', '/api/cuspatient/info', params, function (data) {
+            if (data.code == 1) {
+                var model = data.data || {};
+                $('.formCt').html(template('tp_id', model));
+                $('#sexCheck').removeAttr('onclick');
+                $('#ageCheck').removeAttr('onclick');
+                $('#sexCheck').removeClass('indicator');
+                $('#ageCheck').removeClass('indicator');
+                $('.editIcon').show();
+                $('.sureBtn').addClass('bg_theme');
+            } else {
+                Comm.message(data.msg);
+                app.loadFail(loadEle);
+            }
+        });
+    }
+
+    function deleteCellRecord() {
+
+        var params = {
+            cuspatientid: tid
+        }
+
+        Comm.loading('正在删除...');
+        SLNetwork('post', '/api/cuspatient/delete', params, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                Comm.close();
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+
+    }
+</script>
+
+
+<script type="text/html" id="tp_id">
+    <div class="marl20">
+        <div class="boldb">
+            <span class="f16">姓名</span>
+
+            <input type="text" id="name" value="{{paname||''}}" placeholder="请输入就诊人姓名" {{if cuspatientid}}
+                readonly{{/if }} />
+
+        </div>
+
+        <div class="boldb">
+            <span class="f16">手机号</span>
+            <input type="tel" id="phone" maxlength="11" value="{{paphone||''}}" placeholder="请输入就诊人手机号" />
+        </div>
+
+        <div id="sexCheck" class="boldb indicator" onclick="PageM.genderPicker.show();">
+            <span class="f16">性别</span>
+            <input type="text" id="gender" value="{{getGender(pasex)||''}}" gender="{{pasex||0}}" placeholder="请选择性别"
+                readonly />
+        </div>
+
+        <div id="ageCheck" class="boldb indicator" onclick="PageM.datePicker.show();">
+            <span class="f16">出生日期</span>
+            <input type="text" id="age" value="{{paage||''}}" placeholder="请选择年龄" readonly />
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" maxlength="18" id="idcard" {{if cuspatientid}} readonly{{/if }} value="{{paidcard||''}}"
+                placeholder="请输入身份证" />
+        </div>
+        {{if cuspatientid}}
+        <div class="boldb">
+            <span class="f16">就诊号</span>
+            <input type="text" id="number" value="{{cuspatientid||''}}" placeholder="请输入就诊号" readonly />
+        </div>
+        {{/if}}
+
+    </div>
+</script>
+
+
+</html>

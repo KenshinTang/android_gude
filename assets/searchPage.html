@@ -1,0 +1,352 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>搜索</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+        .navBackIcon {
+            width: 30px;
+        }
+
+        .headItem {
+            line-height: 44px;
+            height: 44px;
+        }
+
+        .searchBar {
+            height: 30px;
+            margin: 7px 2%;
+            line-height: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .searchBar.lIcon {
+            background-position-x: 15px;
+            padding-left: 35px;
+            background-image: url("img/sousuo.png");
+            color: #A8ADBA;
+        }
+
+        .searchItem {
+            padding: 0px 15px;
+            line-height: 30px;
+            background-color: #F5F5F5;
+            font-size: 15px;
+            border-radius: 15px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .group {
+            padding-top: 30px;
+        }
+
+        .hotItems, .historyItems {
+            padding: 0px 15px;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        .loading{
+            height: 100px;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+<header>
+    <div class="navBar bottomBorder flex">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="headItem flex1">
+            <div class="searchBar bg_lgray lIcon pr10">
+                <input id="id_search" type="search" class="mainH mainW mr10 bg_lgray f14" placeholder="请输入搜索关键词">
+            </div>
+        </div>
+        <div class="navItem mr10 ml10 col_theme" onclick="searchSubmit();">搜索</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+
+    <div class="page searchRecord">
+
+        <div class="group hotGroup">
+            <div class="p15 col_sub">热门搜索</div>
+            <div class="flex_wrap p15 hotItems">
+
+            </div>
+        </div>
+
+        <div class="group historyGroup">
+            <div class="flex_between p15">
+                <div class="col_sub">历史搜索</div>
+                <img src="img/delete.png" class="delItem" width="14" height="14" onclick="deleteHistory();">
+            </div>
+
+            <div class="flex_wrap historyItems">
+                <!--<div class="searchItem">益民诊所</div>-->
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="page searchResut bg_lgray loadFail">
+
+
+    </div>
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/mescroll/mescroll.min.js"></script>
+<script src="js/area.js"></script>
+<script src="js/dict.js"></script>
+
+<script>
+
+    var PageM = {
+        hot: [],
+        history: [],
+        result: [],
+        requestParams: {
+            lng: UserJWD.lng(),
+            lat: UserJWD.lat(),
+        },
+        loadEle: $('.searchResut'),
+    }
+
+    function pageload() {
+        showPage('.searchRecord');
+        getAndSetHot();
+        getAndSetHistory();
+    }
+
+
+
+    //提交
+    function searchSubmit() {
+        var searchText = $('#id_search').val() || '';
+        if (!searchText || !searchText.length) {
+            Comm.message('请输入搜索关键词')
+            return;
+        }
+        PageM.requestParams.clinicname = searchText;
+        getSearchList();
+    }
+
+
+
+    //切换页面
+    function showPage(cls) {
+        $('.page').addClass('hide');
+        $(cls).addClass('show').removeClass('hide');
+    }
+
+
+
+    //热门
+    function getAndSetHot() {
+        var hotLoadEle = $('.hotItems');
+        app.loading(hotLoadEle);
+        GDict.init(function () {
+            var arr = GDict.get('hotsearch')||[];
+            if (arr.length){
+                var hotItemsHtml = template('tp_id_item',arr);
+                $(hotLoadEle).html(hotItemsHtml)
+            } else {
+                app.loadFail(hotLoadEle,1);
+            }
+        });
+    }
+
+
+    //历史
+    function getAndSetHistory() {
+        var hisLoadEle = $('.historyItems');
+        var historyArr = Comm.db('history')||[];
+        var hisItemsHtml = template('tp_id_item_his',historyArr);
+        $(hisLoadEle).html(hisItemsHtml);
+
+        if (!historyArr.length){
+            $('.historyGroup').hide();
+        } else {
+            $('.historyGroup').show();
+        }
+    }
+
+
+
+    //获取推荐列表
+    function getSearchList() {
+
+        var searchText = PageM.requestParams.clinicname;
+        if (searchText && searchText.length){
+            var list = Comm.db('history')||[];
+            if (list.indexOf(searchText)<=-1){
+                list.unshift(searchText);
+                Comm.db('history',list);
+            }
+        }
+
+
+
+        app.loading(PageM.loadEle);
+        GDict.init(function () {
+
+            SLNetwork('get', '/api/clinic/list', PageM.requestParams, function (a) {
+                if (a.code == 1) {
+                    var showArr = a.data || [];
+
+                    showArr.forEach(function (ele, idx) {
+                        ele.tags = [];
+                        if (ele.spicaldict && ele.spicaldict && ele.spicaldict.length) {
+                            ele.tags = ele.spicaldict.split(',')
+                        }
+                    })
+
+                    var htmlEle = template('tp_cellId', showArr);
+                    $('.searchResut').html(htmlEle);
+                    showPage('.searchResut');
+                    dealStar('.starMark');
+
+                    if (!showArr.length) {
+                        app.loadNoData(PageM.loadEle);
+                    }
+
+                } else {
+                    app.loadFail(PageM.loadEle,2);
+                }
+            });
+        });
+    }
+
+    function failReload(tp){
+        if (tp == 1){
+            getAndSetHistory();
+        } else if (tp == 2){
+            getSearchList();
+        }
+    }
+
+
+
+    //点击item
+    function itemClickedSearch(text) {
+        $('#id_search').val(text);
+        PageM.requestParams.clinicname = text;
+        getSearchList();
+    }
+
+
+    //点击删除
+    function deleteHistory() {
+        Comm.db('history',[]);
+        getAndSetHistory();
+    }
+
+
+
+
+
+</script>
+
+
+</body>
+
+
+<script type="text/html" id="tp_cellId">
+
+    {{each $data model i}}
+
+    <div class="rcm_goodsCell flex flexItem_between mb10"
+         onclick="Comm.go('clinicDetails.html?cid={{model.clinicid||0}}')">
+        <img class="faceImg bg_lgray br5 placeImg" src="{{OSS(model.head,'s')}}" onerror="app.errorimg(this);">
+
+        <div class="flex1 flex flexItem_v flexItem_between marl15">
+
+            <div class="flex baseWH">
+                <div class="rcm_title f16 bold TBreak autoTextW" style="width: 0">
+                    <p class="mainW wordW">{{model.clinicname||''}}</p>
+                </div>
+            </div>
+
+
+            <div class="rcm_info baseWH mt5 mb5 flex_between col_sub baseWH">
+
+                <div class="evaluate flex_start">
+                    <div class="starMark bg_place" star="{{model.avgvalue||0}}"></div>
+                    <div class="f12 lineSpan">
+                        <span class="col_theme ml5 point">{{model.avgvalue||0}}分</span>
+                        <span class="col_lgray f14 lineV">丨</span>
+                        <span>已服务{{model.servercount||0}}人</span>
+                    </div>
+                </div>
+
+                <div class="f12 col_sub999">{{distance(model.distance)}}</div>
+
+            </div>
+
+            <div class="rcm_tag flex_wrap baseWH">
+                {{each model.tags tid i}}
+                <div class="tagLabel">{{getTag(tid)}}</div>
+                {{/each}}
+            </div>
+
+        </div>
+
+    </div>
+
+    {{/each}}
+
+</script>
+
+
+<script type="text/html" id="tp_id_item">
+
+    {{each $data model i}}
+    <div class="searchItem" onclick="itemClickedSearch('{{model.dictname||''}}')">{{model.dictname||''}}</div>
+    {{/each}}
+
+</script>
+
+
+<script type="text/html" id="tp_id_item_his">
+
+    {{each $data history i}}
+    <div class="searchItem" onclick="itemClickedSearch('{{history||''}}');">{{history||''}}</div>
+    {{/each}}
+
+</script>
+
+
+
+</html>

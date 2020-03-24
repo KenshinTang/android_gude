@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>关于我们</title>
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+    <link href="css/g.css" type="text/css" rel="stylesheet">
+    <link href="css/comm.css" type="text/css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            background-color: #fff;
+        }
+
+        .form .form_item label {
+            width: 80px;
+        }
+
+
+        .boldt {
+            border-top: 1px solid #eee;
+            line-height: 50px;
+            padding-left: 10px;
+            width: 97%;
+        }
+        .boldb {
+            border-bottom: 1px solid #eee;
+            line-height: 50px;
+            padding-left: 10px;
+            width: 97%;
+        }
+
+        .boldb img,
+        .boldb span {
+            vertical-align: middle;
+        }
+
+        .boldb img.right {
+            margin-top: 19px;
+        }
+
+        .boldb input {
+            text-align: right;
+            font-size: 15px;
+            height: 30px;
+        }
+
+        .boldb input[type=button] {
+            color: #CCCCCC;
+            background-color: white;
+            margin-right: 15px;
+            margin-top: 10px;
+            float: right;
+        }
+
+        .indicator{
+            background-size: 9px auto;
+            background-image: url("stIconfile/identi_g.png");
+        }
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="navTitle">关于我们</div>
+        </div>
+    </header>
+
+    <section class="body">
+        <div class="center marb30" style="margin: 60px auto;">
+            <div class="flex_center">
+                <div class="p15 border" style="width:80px;height:80px;border-radius:11px;border-color: #eee;"><img src="img/appLogoIcon.png" width="50"></div>
+            </div>
+            <span style="color: #737373;display: block;padding-top: 10px" id="id_version">V1.1.0</span>
+        </div>
+        <div class="marr10 marl10">
+            <div class="boldb boldt indicator" onclick="Comm.go('artical.html?aid=4')">
+                <span class="f16">关于我们</span>
+            </div>
+            <div class="boldb indicator" onclick="Comm.go('artical.html?aid=22')">
+                <span class="f16" >版本说明</span>
+            </div>
+        </div>
+
+    </section>
+
+    <footer class="center colorb5 lh50 f12">
+        <!--Copyright©2018-->
+    </footer>
+</body>
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/art-template.js"></script>
+<script src="js/dict.js"></script>
+<script>
+
+    function pageload(){
+        Comm.getVersion(function (versionInfo) {
+            $('#id_version').text(versionInfo.versionName);
+        })
+
+    }
+
+</script>
+
+</html>

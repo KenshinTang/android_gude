@@ -1,0 +1,272 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>评价</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .hIcon {
+            border-radius: 8px;
+            width: 80px;
+            height: 80px;
+        }
+
+        .cor_sub222 {
+            color: #222222;
+        }
+
+        .evaItem {
+            padding: 25px;
+            margin: 10px;
+            border-radius: 5px;
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+        .starDes{
+            width: 80px;
+        }
+        .inputArea {
+            width: 100%;
+            min-height: 80px;
+            height: 80px;
+            line-height: 20px;
+            font-size: 14px;
+        }
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="androidback()"></div>
+        <div class="navTitle">评价</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+    <div class="m10 col_white center lh50 f17 submit bg_trans" onclick="submitClicked();">发表评论</div>
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dict.js"></script>
+
+<script src="js/art-template.js"></script>
+
+
+
+<script>
+
+    var oid = Comm.query('oid')||'';
+
+    function androidback() {
+        Comm.close();
+    }
+
+    function pageload() {
+        GDict.init(function () {
+            getDetail(oid);
+        })
+
+    }
+
+
+    function getDetail(orderId) {
+        var parm = {
+            docappointmentid:orderId
+        }
+
+        var loadEle = $('section');
+        app.loading(loadEle);
+        SLNetwork('get','/api/appointment/info', parm, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                nslog(data);
+                var model = data.data||{};
+                model.tags = model.docspical.split(',');
+
+                var html = template('tp_id_evaluate',model);
+                $('section').html(html);
+                registStar();
+            } else {
+                Comm.message(data.msg);
+                app.loadFail(loadEle);
+            }
+        });
+    }
+
+    function failReload(){
+        getDetail(oid);
+    }
+
+    function registStar() {
+
+        dealStar('.starMark', 16, 5,5);
+        clickList('.canSet','.starMark .baseStar',function (o,idx) {
+            var starC = idx % 5 + 1;
+            $(o).parent().attr('star',starC);
+            $(o).parent().next().text(getStarDes(starC));
+            registStar();
+        })
+    }
+
+
+
+    function submitClicked() {
+        var requestParm = {
+            docappointmentid:oid,
+            content:$('#id_textArea').val(),
+            value:$('.eva1').attr('star'),//效果
+            sevalue:$('.eva2').attr('star'),//服务
+            envalue:$('.eva3').attr('star'),//环境
+        }
+
+        if (!requestParm.value || !requestParm.sevalue || !requestParm.envalue || !requestParm.content){
+            Comm.message('请先完成对诊所的评价');
+            return;
+        }
+
+        Comm.loading('正在发表评价...');
+        SLNetwork('post', '/api/comment/add', requestParm, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                Comm.message('发表评价成功');
+                setTimeout(function () {
+                    Comm.close();
+                },400);
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+<script type="text/html" id="tp_id_evaluate">
+
+    <div class="flex flexItem_h flexItem_start p15">
+        <img class="placeImg hIcon" src="{{OSS(head,'s')}}" onerror="app.errorimg(this);">
+
+        <div class="flex1 flex flexItem_v flexItem_center_js ml10">
+
+            <div class="flex baseWH mb5">
+                <div class="f16 bold TBreak autoTextW" style="width: 0">
+                    <p class="mainW wordW2">{{companyname||''}}</p>
+                </div>
+            </div>
+            <div class="mainW wordW f15 cor_sub222 baseWH">
+                {{docname||''}}
+
+                {{if tags && tags.length}}
+                |
+                {{/if}}
+
+                {{each tags tid i}}
+                {{getTag(tid)}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="linebod"></div>
+
+
+    <div class="mart20 canSet">
+
+        <div class="evaItem flex_between shadow">
+
+            <div class="f16">效果</div>
+            <div></div>
+
+            <div class="starEva flex_start">
+                <div class="starMark eva1" star="0"></div>
+                <div class="col_theme ml10 starDes"></div>
+            </div>
+
+            <div></div>
+
+        </div>
+
+
+        <div class="evaItem flex_between shadow">
+
+            <div class="f16">服务</div>
+            <div></div>
+
+            <div class="starEva flex_start">
+                <div class="starMark eva2" star="0"></div>
+                <div class="col_theme ml10 starDes"></div>
+            </div>
+
+            <div></div>
+
+        </div>
+
+
+        <div class="evaItem flex_between shadow">
+
+            <div class="f16">环境</div>
+            <div></div>
+
+            <div class="starEva flex_start">
+                <div class="starMark eva3" star="0"></div>
+                <div class="col_theme ml10 starDes"></div>
+            </div>
+
+            <div></div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="p15 bg_white border br5 m15">
+        <textarea id="id_textArea" class="inputArea" placeholder="请输入评价内容"></textarea>
+    </div>
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <link href="inc/indexedlist/indexedlist.css" rel="stylesheet" />
+    <link href="css/g.css" rel="stylesheet" />
+    <link href="css/comm.css" rel="stylesheet" />
+
+    <script src="inc/indexedlist/indexed-list.js"></script>
+
+
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+        #list{
+            height: 100%;
+        }
+        .mui-bar {
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
+        input{
+            margin-bottom: 0px !important;
+            background-color: unset !important;
+        }
+
+        .getLoc{
+            padding: 5px 10px;
+            margin: 10px;
+            border: 1px solid #E4E4E4;
+        }
+
+    </style>
+</head>
+
+<body>
+<!--<header class="mui-bar mui-bar-nav">-->
+    <!--<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>-->
+    <!--<h1 class="mui-title">地址选择</h1>-->
+<!--</header>-->
+
+<header>
+    <div class="navBar bottomShadow">
+        <div class="navBackIcon" onclick="Comm.close();"></div>
+        <div class="navTitle">地址选择</div>
+    </div>
+</header>
+
+
+
+<div class="mui-content">
+    <div id='list' class="mui-indexed-list">
+        <div class="mui-indexed-list-search mui-input-row mui-search">
+            <input type="search" class="hide mui-input-clear mui-indexed-list-search-input" placeholder="输入搜索区县">
+        </div>
+
+        <div class="bg_white left mainW">
+            <div class="p10 bg_lgray">当前定位</div>
+
+            <div class="flex_wrap">
+                <div class="getLoc" onclick="showCurLocation();">成都</div>
+            </div>
+
+
+        </div>
+
+
+        <div class="mui-indexed-list-bar">
+            <a>A</a>
+            <a>B</a>
+            <a>C</a>
+            <a>D</a>
+            <a>E</a>
+            <a>F</a>
+            <a>G</a>
+            <a>H</a>
+            <a>I</a>
+            <a>J</a>
+            <a>K</a>
+            <a>L</a>
+            <a>M</a>
+            <a>N</a>
+            <a>O</a>
+            <a>P</a>
+            <a>Q</a>
+            <a>R</a>
+            <a>S</a>
+            <a>T</a>
+            <a>U</a>
+            <a>V</a>
+            <a>W</a>
+            <a>X</a>
+            <a>Y</a>
+            <a>Z</a>
+        </div>
+        <div class="mui-indexed-list-alert"></div>
+        <div class="mui-indexed-list-inner mainW">
+            <div class="mui-indexed-list-empty-alert">没有数据</div>
+            <ul class="mui-table-view" id="id_list">
+
+
+                <!--<li data-group="A" class="mui-table-view-divider mui-indexed-list-group">A</li>-->
+                <!--<li data-value="AKU" data-tags="AKeSu" class="mui-table-view-cell mui-indexed-list-item">阿克苏机场</li>-->
+                <!--<li data-value="BPL" data-tags="ALaShanKou" class="mui-table-view-cell mui-indexed-list-item">阿拉山口机场</li>-->
+                <!--<li data-value="AAT" data-tags="ALeTai" class="mui-table-view-cell mui-indexed-list-item">阿勒泰机场</li>-->
+                <!--<li data-value="NGQ" data-tags="ALiKunSha" class="mui-table-view-cell mui-indexed-list-item">阿里昆莎机场</li>-->
+                <!--<li data-value="AQG" data-tags="AnQingTianZhuShan" class="mui-table-view-cell mui-indexed-list-item">安庆天柱山机场</li>-->
+                <!--<li data-value="MFM" data-tags="AoMenGuoJi" class="mui-table-view-cell mui-indexed-list-item">澳门国际机场</li>-->
+
+
+
+                <!--<li data-group="B" class="mui-table-view-divider mui-indexed-list-group">B</li>-->
+                <!--<li data-value="BSD" data-tags="BaoShan" class="mui-table-view-cell mui-indexed-list-item">保山机场</li>-->
+                <!--<li data-value="BAV" data-tags="BaoTou" class="mui-table-view-cell mui-indexed-list-item">包头机场</li>-->
+                <!--<li data-value="BHY" data-tags="BeiHaiFuCheng" class="mui-table-view-cell mui-indexed-list-item">北海福成机场</li>-->
+                <!--<li data-value="NAY" data-tags="BeiJingNanYuan" class="mui-table-view-cell mui-indexed-list-item">北京南苑机场</li>-->
+                <!--<li data-value="PEK" data-tags="BeiJingShouDuGuoJi" class="mui-table-view-cell mui-indexed-list-item">北京首都国际机场</li>-->
+                <!--<li data-value="BSD" data-tags="BaoShan" class="mui-table-view-cell mui-indexed-list-item">保山机场</li>-->
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="inc/indexedlist/Convert_Pinyin.js"></script>
+
+
+<script src="js/area.js"></script>
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/comm.js"></script>
+
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+
+    function pageload(){
+        Comm.loading('正在加载');
+        setTimeout(function () {
+            initMUI();
+        },200);
+
+        Comm.position(function (a) {
+            if (a.code == 1) {
+                UserJWD.saveJWDValue(a);
+                $('.getLoc').text(UserJWD.curdis());
+            }
+
+        })
+
+    }
+
+    function showCurLocation() {
+        var jwd = UserJWD.JWD();
+        jwd.aid = '';
+        UserJWD.saveJWDValue(jwd);
+        Comm.close();
+    }
+
+
+    function initMUI(){
+
+        Area.init();
+        mui.init();
+        mui.ready(function() {
+            var header = document.querySelector('header');
+            var list = document.getElementById('list');
+            //calc hieght
+            list.style.height = (document.body.offsetHeight - header.offsetHeight) + 'px';
+
+            initArea();
+            //create
+            window.indexedList = new mui.IndexedList(list);
+        });
+    }
+
+    function initArea() {
+        // return;
+        console.log(_area);
+        var arr_p = _area || [];
+
+
+        var englishLetter = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','#'];
+
+        var letterDic = {};
+        for (var lindex in englishLetter){
+            var letter = englishLetter[lindex];
+            letterDic[letter] = [];
+        }
+
+        for (var pindex in arr_p){
+
+            var province = arr_p[pindex];
+            var arr_c = province.c;
+            for (var cindex in arr_c){
+
+                var city = arr_c[cindex];
+                var arr_a = city.c;
+                for (var aindex in arr_a){
+
+                    var area = arr_a[aindex];
+                    var fullName = pinyin.getFullChars(area.n);
+                    var firstPinyin = fullName.slice(0,1);
+
+                    var array = letterDic[firstPinyin] || letterDic['#'];
+
+                    try {
+                        array.push(area);
+                    }catch (e) {
+
+                    }
+                }
+
+            }
+        }
+
+
+        var listHtml = '';
+        console.log(new Date())
+
+        for (var lindex in englishLetter){
+            var letter = englishLetter[lindex];
+            var arr = letterDic[letter];
+
+            listHtml += '<li data-group="'+letter+'" class="mui-table-view-divider mui-indexed-list-group">'+letter+'</li>';
+            for (var cindex in arr){
+                var area = arr[cindex];
+                var fullName = pinyin.getFullChars(area.n);
+                if (fullName){
+                    listHtml += '<li data-value="AKU" data-tags="'+fullName+'" class="mui-table-view-cell mui-indexed-list-item" onclick="showChildren('+area.i+')">'+area.n+'</li>';
+                }
+            }
+        }
+
+        document.getElementById('id_list').innerHTML = listHtml;
+
+        Comm.loading();
+    }
+
+
+    function showChildren(aid) {
+        event.stopPropagation();
+        tempAid = '';
+
+        if ($('#'+aid).html()){
+            $('#'+aid).html('');
+            return;
+        }
+
+        var aModel = Area.getArea(aid);
+
+        var arr = aModel.children||[];
+
+
+        $('.child'+aModel.l).html('');
+
+
+
+        if (arr.length){
+            var html = template('tp_id_cell', arr);
+            $('#'+aid).html(html);
+        } else {
+            tempAid = aid;
+            Comm.db('showArea',aModel);
+            Comm.close();
+        }
+
+        console.log(tempAid);
+    }
+
+
+</script>
+</body>
+
+</html>

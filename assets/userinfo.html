@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>个人中心</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        .cellContent {
+            height: 50px;
+        }
+
+        .cellContent input {
+            text-align: right;
+            font-size: 15px;
+            height: 30px;
+        }
+
+        .cellContent input:disabled {
+            background: none;
+        }
+
+        .cellContent input[type=button] {
+            /*color: #CCCCCC;*/
+            background-color: white;
+            margin-right: 5px;
+        }
+
+        .head {
+            overflow: hidden;
+            border-radius: 22.5px;
+        }
+
+        .head,
+        .head > img {
+            height: 45px;
+            width: 45px;
+        }
+
+        .headCell {
+            height: 70px;
+        }
+
+        .faceImg {
+            border-radius: 50%;
+            background-color: #E4E4E4;
+        }
+
+        body > footer {
+            z-index: 90;
+        }
+
+        .disable {
+            color: #CCCCCC !important;
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close();"></div>
+        <div class="navTitle">个人中心</div>
+    </div>
+</header>
+
+
+<section class="bg_white">
+    <div class="linebod"></div>
+
+    <div class="paddl15 bg_white">
+        <div class="cellContent headCell bottomBorder indicator">
+            <div class="label f16 icon_pre icon_tx">更改头像</div>
+            <div class="head" style="border-radius: 50%;">
+                <div id="faceImg" class="selectImg">
+                    <img id="face" name="face" width="45" height="45" onerror="app.herrorimg(this)"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content">
+
+    </div>
+
+</section>
+
+<footer>
+    <div class="bg_trans m10 col_white center lh50 f18 submit" onclick="updateUserinfo()">保存</div>
+</footer>
+
+
+</body>
+
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/area.js"></script>
+<script src="js/picker.min.js"></script>
+<script src="inc/upimg/upload.js"></script>
+<script src="js/art-template.js"></script>
+<script src="js/api.js"></script>
+
+
+<script>
+    var PageM = {
+        uploader: null,
+        userinfo: app.getUserinfo(),
+        datePicker: null,
+        genderPicker: null,
+        requestParms:{},
+    }
+
+
+    function pageload() {
+
+        PageM.uploader = new imgUploader('faceImg');
+        $("#content").html(template('main', PageM.userinfo));
+        getUserinfo();
+
+
+        initPicker();
+
+    }
+
+    function initPicker() {
+
+
+        var genderArr = [{
+            text: '男',
+            i: 1,
+        },{
+            text: '女',
+            i: 2,
+        }];
+
+        PageM.genderPicker = new Commpicker("选择性别", [genderArr], function (a, v, sid) {
+            $('.gender').text(v);
+            PageM.requestParms.sex = sid;
+        });
+
+        PageM.datePicker = new Datepicker('请选择生日',function (a,v) {
+            $('.birthday').text(v);
+            PageM.requestParms.birthday = v;
+        })
+    }
+
+
+    function getUserinfo() {
+        SLNetwork('get', '/api/customer/show', {}, function (a) {
+            if (a.code == 1) {
+                PageM.userinfo = app.saveUserinfo(a.data);
+                PageM.requestParms.sex = PageM.userinfo.sex;
+                PageM.requestParms.birthday = PageM.userinfo.birthday;
+                PageM.requestParms.head = PageM.userinfo.head;
+
+                setHeadImfUrl(PageM.userinfo.head);
+                $("#content").html(template('main', PageM.userinfo));
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+    }
+
+    function setHeadImfUrl(url) {
+        $('#face').attr('src', Comm.OSS.getImgUrl(url, 's'));
+    }
+
+
+    function updateUserinfo(cb) {
+        PageM.requestParms.nickname = $('#nickName').val();
+        if (PageM.uploader.imgList && PageM.uploader.imgList.length){
+            PageM.requestParms.head = PageM.uploader.imgList[0];
+        }
+
+
+
+        if (!SLValid.isValidText(PageM.requestParms.nickname)){
+            Comm.message('姓名不能包含特殊符号');
+            return;
+        }
+
+
+        var parm = skipNullValueKey(PageM.requestParms);
+        Comm.loading('正在修改...')
+        SLNetwork('post', '/api/customer/modify', parm, function (a) {
+            Comm.loading();
+            if (a.code == 1){
+
+                var tempUser = app.getUserinfo();
+                tempUser.nickname = PageM.requestParms.nickname;
+
+                tempUser.sex = PageM.requestParms.sex;
+                tempUser.birthday = PageM.requestParms.birthday;
+                tempUser.head = PageM.requestParms.head;
+
+                app.saveUserinfo(tempUser);
+                Comm.message('修改成功')
+                console.log(app.getUserinfo());
+                setTimeout(function () {
+                    Comm.close();
+                },200);
+
+            } else {
+                Comm.message(a.msg);
+            }
+        });
+    }
+
+
+</script>
+
+
+<script id="main" type="text/html">
+    <div class="linebod"></div>
+
+    <div class="paddl15 bg_white ">
+        <div class="cellContent  bottomBorder ">
+            <div class="label f16 icon_pre icon_name ">姓名</div>
+            <input id="nickName" type="text" maxlength="16" placeholder="请填写昵称" value="{{nickname||''}}"/>
+        </div>
+    </div>
+
+
+    <div class="paddl15 bg_white" onclick="PageM.genderPicker.show();">
+        <div class="cellContent indicator bottomBorder">
+            <div class="label f16 icon_pre icon_phone">性别</div>
+
+            <div class="col_title col_sub disable gender">{{getGender(sex)}}</div>
+        </div>
+    </div>
+
+
+    <div class="paddl15 bg_white" onclick="return;Comm.go('modifyBindTel.html');">
+        <div class="cellContent bottomBorder">
+            <div class="label f16 icon_pre icon_phone ">联系电话</div>
+            <div id="phone" name="phone" class="col_title col_sub disable" style="color:#000 !important;">{{phone||''}}</div>
+        </div>
+    </div>
+
+
+    <div class="paddl15 bg_white" onclick="PageM.datePicker.show();">
+        <div class="cellContent indicator bottomBorder">
+            <div class="label f16 icon_pre icon_phone ">生日</div>
+
+            <div class="col_title col_sub disable birthday">{{birthday||'选择日期'}}</div>
+        </div>
+    </div>
+
+
+</script>
+
+</html>

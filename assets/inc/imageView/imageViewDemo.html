@@ -1,0 +1,100 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+    <base href="../../">
+
+    <title>title</title>
+    
+    
+    
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        img {
+            text-align: center;
+            max-width: 100%;
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navItemIcon marr10"></div>
+        <div class="navTitle">设置</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section class="center" id="artical">
+
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <div>哈哈好没的风景啊</div>
+    <div>哈哈好没的风景啊</div>
+    <div>哈哈好没的风景啊</div>
+    <div>哈哈好没的风景啊</div>
+    <div>哈哈好没的风景啊</div>
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <div>哈哈好没的风景啊</div>
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg/120" alt="">
+    <img src="https://guoren-app.oss-cn-shenzhen.aliyuncs.com/2019_05/aepx93IMG_20190530_161206.jpg" alt="">
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <div>哈哈好没的风景啊</div>
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <div>哈哈好没的风景啊</div>
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <img src="https://shuicheche.oss-cn-hangzhou.aliyuncs.com/img/2019-06/pcytmRWypR53.jpg" alt="">
+    <div>哈哈好没的风景啊</div>
+    <div>哈哈好没的风景啊</div>
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="inc/imageview/imageview.js"></script>
+
+<script>
+
+    function pageload(){
+        addPhotoBroswer();
+    }
+
+
+    //加载图片浏览器
+    function addPhotoBroswer() {
+        var imgs = document.getElementById("artical");
+        imgs.addEventListener('click', function () {
+
+            ImageView.show({
+                pattern: 'default',
+                selector: 'img',
+                initDisplaySize: 'contain',
+                initDisplayPositionX: 'center',
+                initDisplayPositionY: 'center',
+            });
+
+        });
+    }
+
+</script>
+
+</body>
+
+</html>

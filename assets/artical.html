@@ -1,0 +1,258 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>详情</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+            object-fit: contain;
+        }
+
+        .navItemIcon {
+            background-image: url("img/share_a.png");
+        }
+
+        .collectionItem {
+            background-image: url("img/xin_n.png");
+        }
+
+        .collectionItem.active {
+            background-image: url("img/xin_s.png");
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="navItemIcon collectionItem mr10 hide" onclick="clinitCollection(this);"></div>
+            <div class="navItemIcon shareItem mr10 hide" onclick="shareMessage();"></div>
+            <div class="navTitle"></div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="p10 scroll-y">
+
+        <div id="content" class="scroll-y">
+
+        </div>
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        var aid = Comm.query('aid'),
+            type = Comm.query('type');
+        var pageShared = Comm.query("share");
+        var PageM = {};
+
+        var loadEle = $('#content');
+
+        //百科        type = 1
+        //banner     type = 2
+        //文章        type = 4
+        //配置文章     无type
+        //消息        type = 5
+
+
+        function pageload() {
+            if (pageShared) {
+                $('.navBar').remove();
+                $('footer').html(footCt);
+                Comm.resizeSection();
+            }
+            if (aid) {
+                if (type == 4) {
+                    $('.navItemIcon').removeClass('hide');
+                    getAdverWithAid(aid);
+                } else if (type == 5) { //消息
+                    getMessageWithMsgid(aid);
+                } else if (type == 1) { //百科
+                    $('.navItemIcon').removeClass('hide');
+                    getArticalWithAid(aid);
+                } else {
+                    getArticalWithAid(aid);
+                }
+
+                // else if (!type) {
+                //     getArticalWithAid(aid);
+                // }
+                // else {
+                //     $('.navItemIcon').removeClass('hide');
+                //     getArticalWithAid(aid);
+                // }
+
+            } else {
+
+            }
+
+            checkIsCollection($('.collectionItem'), aid, 3);
+
+        }
+
+        function clinitCollection(ele) {
+            if (!aid) return;
+            collectionClicked(ele, aid, 3);
+        }
+
+
+
+
+        //根据id获取文章
+        function getArticalWithAid(artId) {
+            console.log('getArticalWithAid');
+            config.notDeal = true;
+            var params = {
+                articleid: artId
+            }
+            app.loading(loadEle);
+            SLNetwork('get', '/api/article/info', params, function (data) {
+                if (data.code == 1) {
+                    PageM.model = data.data || {};
+                    $('.navTitle').html(data.data.articlename || '详情');
+                    $('#content').html(data.data.section);
+                } else {
+                    Comm.getMessageError(1);
+                    // app.loadFail(loadEle, 1);
+                    // Comm.message(data.msg);
+                }
+                // $('img').forEach(function (o,i) {
+                //     $(o).onerror = app.errorimg(o);
+                // })
+            });
+        }
+
+        //根据messageid获取详情
+        function getMessageWithMsgid(msgId) {
+            config.notDeal = true;
+            var params = {
+                MessageId: msgId
+            }
+            app.loading(loadEle);
+            SLNetwork('get', '/common/Message/info', params, function (data) {
+                if (data.code == 1) {
+                    PageM.model = data.data || {};
+                    // $('.navTitle').html(data.data.messagetitle || '详情');
+
+                    var content = '<div class="flex_between mb10 mt5">\n' +
+                        '            <div class="col_title bold f15">' + data.data.messagetitle + '</div>\n' +
+                        '            <div class="col_sub">' + data.data.messagedate + '</div>\n' +
+                        '        </div>\n' +
+                        '        \n' +
+                        '        <div>' + data.data.messagecontext + '</div>';
+
+                    $('#content').html(content);
+                } else {
+                    Comm.getMessageError(5);
+                    // app.loadFail(loadEle, 2);
+                    // Comm.message(data.msg);
+                }
+
+                // $('img').forEach(function (o,i) {
+                //     $(o).onerror = app.errorimg(o);
+                // })
+            });
+        }
+
+
+
+
+        //根据id获取广告详情
+        function getAdverWithAid(artId) {
+
+            console.log('getAdverWithAid');
+            config.notDeal = true;
+            var params = {
+                advertid: artId
+            }
+            app.loading(loadEle);
+            SLNetwork('get', '/api/advert/show', params, function (data) {
+
+                if (data.code == 1) {
+                    PageM.model = data.data || {};
+                    $('.navTitle').html(data.data.adname || '详情');
+                    $('#content').html(data.data.content);
+                } else {
+                    Comm.getMessageError(4);
+                    // app.loadFail(loadEle, 2);
+                    // Comm.message(data.msg);
+                }
+                // $('img').forEach(function (o,i) {
+                //     $(o).onerror = app.errorimg(o);
+                // })
+            });
+        }
+
+        function failReload(tp) {
+            if (tp == 1) {
+                getArticalWithAid(aid);
+            } else if (tp == 2) {
+                getAdverWithAid(aid);
+            }
+        }
+
+
+
+        //点击分享
+        function shareMessage() {
+            preventRepeadClickDeal(function () {
+                Comm.shareUrl({
+                    platform: '',
+                    pic: config.SLShareBase + 'img/appLogoIcon.png', //分享图片路径
+                    title: '古德博士', //分享标题
+                    desc: PageM.model.articlename || PageM.model.adname || '古德博士', //分享描述
+                    url: config.SLShareBase + 'artical.html?share=1&type=' + type + '&aid=' + aid,
+                }, function (d) { //回调
+                    if (d == 1) {
+                        Comm.message("分享成功");
+                    }
+                });
+            }, 3);
+        }
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>
+
+
+<!--
+3	关于我们
+4	关于产品
+5	帮助说明
+6	注册协议
+7	水车车服务协议
+8	入驻协议
+9	邀请好友规则
+10	邀请好友文章1
+23	邀请好友文章2
+24	合伙人协议
+-->

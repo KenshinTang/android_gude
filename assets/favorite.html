@@ -1,0 +1,588 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>我的收藏</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+        .page {
+            display: none;
+        }
+
+        .segItem {
+            color: #717171;
+            line-height: 25px;
+        }
+
+        .segItem.active {
+            color: #EF5F1E;
+            position: relative;
+        }
+
+        .segItem.active::after {
+            height: 3px;
+            width: 20px;
+            position: absolute;
+            bottom: 0px;
+            left: calc(50% - 10px);
+            background-color: #EF5F1E;
+            display: block;
+            content: ' ';
+        }
+
+        .cellSel {
+            padding-left: 40px;
+            height: 30px;
+        }
+
+        .check {
+            background-image: url("img/agree_n.png");
+        }
+
+        .active.check {
+            background-image: url("img/sel_y.png");
+        }
+
+        /*footer*/
+        .bottomBar {
+            height: 55px;
+            padding: 0px 10px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+        .del {
+            width: 105px;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        .mainW {
+
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navItem mr10 edit col_theme" onclick="pageEdit()">编辑</div>
+        <div class="navTitle">我的收藏</div>
+    </div>
+
+    <!--选项卡 -->
+    <div class="segBar flex_around pad_v10">
+        <div class="flex_center segItem active pad_h10">诊所</div>
+        <div class="flex_center segItem pad_h10">医生</div>
+        <div class="flex_center segItem pad_h10">百科资讯</div>
+    </div>
+</header>
+
+
+<section class="bg_lgray">
+
+    <!--收藏的诊所-->
+    <div class="page mescroll" id="refreshId0">
+        <div id="id_list0">
+
+
+        </div>
+    </div>
+
+
+    <!--收藏的医生-->
+    <div class="page mescroll" id="refreshId1">
+        <div id="id_list1">
+
+
+        </div>
+    </div>
+
+
+    <!--收藏的资讯-->
+    <div class="page mescroll" id="refreshId2">
+        <div id="id_list2">
+
+
+        </div>
+    </div>
+
+
+</section>
+
+<footer>
+
+    <div class="flex_between p10 bottomBar hide">
+        <div id="q" class="lIcon sall check">全选</div>
+        <div class="del bg_trans col_white br5" onclick="deleteSubmit()">删除</div>
+    </div>
+
+</footer>
+
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dict.js"></script>
+<script src="inc/mescroll/mescroll.min.js"></script>
+<script src="js/art-template.js"></script>
+
+
+<script type="text/javascript">
+    var pageRefArr = [], curPageIdx = 0;
+
+
+    function pageload() {
+
+        GDict.init(function () {
+            showWithPageIndex(curPageIdx);
+        })
+
+
+        //点击商品、店铺切换
+        clickList('.segBar', '.segItem', function (o, idx) {
+            editComplectUI();
+            showWithPageIndex(idx);
+        });
+    }
+
+
+    /************************************************/
+    //点击编辑
+    function pageEdit() {
+        if ($('.edit').text() == '编辑') {
+
+            $('.edit').text('完成');
+            $('.bottomBar').removeClass('hide');
+            $('.cellSel').removeClass('hide');
+            isEdit = true;
+            Comm.resizeSection();
+        } else {
+            editComplectUI();
+        }
+
+    }
+
+
+    function editComplectUI() {
+        $('.edit').html('编辑');
+        $('.bottomBar').addClass('hide');
+        $('.cellSel').addClass('hide');
+        isEdit = false;
+        selectedAll(false);
+        Comm.resizeSection();
+    }
+
+
+    function selectedAll(istrue) {
+        if (istrue) {
+            $('.check').addClass('active');
+        } else {
+            $('.check').removeClass('active');
+        }
+    }
+
+    //初始化选择事件
+    function initCheck() {
+        checkBoxChoose('body', '.check', function (t, idx) {
+            var sall = $(t).hasClass('sall');
+            if (sall) {
+                var isSall = $(t).hasClass('active');
+                selectedAll(isSall);
+            } else {
+                checkSall();
+            }
+        })
+    }
+
+    //检查是否全选
+    function checkSall() {
+
+        var checkSel = '#refreshId' + curPageIdx + ' ';
+        var activeSel = '#refreshId' + curPageIdx + ' ';
+
+        if ($(checkSel + '.cellSel').length == $(activeSel + '.cellSel.active').length) {
+            selectedAll(true);
+        } else {
+            $('.sall').removeClass('active');
+        }
+    }
+
+
+    function deleteSubmit() {
+        var checkSel = '#refreshId' + curPageIdx + ' ';
+        var activeSel = '#refreshId' + curPageIdx + ' ';
+
+        var list = $(activeSel + '.cellSel.active') || [];
+        if (!list.length) {
+            Comm.message('请选择要删除的商品')
+            return;
+        }
+
+
+        var arr = [];
+        list.forEach(function (e) {
+            arr.push($(e).attr('sid'))
+        });
+
+        nslog(arr);
+        var params = {
+            cuscollectids: arr.join(','),
+            // itemType: curPageIdx + 1,
+        }
+        SLNetwork('post', '/api/collect/batchDisCollect', params, function (data) {
+
+            if (data.code == 1) {
+                list.parent().remove();
+                selectedAll(false);
+            } else {
+                Comm.message(data.msg);
+            }
+        });
+    }
+
+
+    /************************************************/
+
+
+    function showWithPageIndex(pageIndex) {
+        curPageIdx = pageIndex;
+        $('.page').removeClass('show');
+        $($('.page')[pageIndex]).addClass('show');
+
+        $('.segBar .segItem').removeClass('active');
+        $($('.segBar .segItem')[pageIndex]).addClass('active');
+
+        addrefresh(pageIndex)
+    }
+
+
+    function addrefresh(idx) {
+
+        var merefresh = pageRefArr[idx];
+        if (!merefresh) {
+            merefresh = new MERefresh();
+            merefresh.refreshOption.refreshUrl = '/api/collect/collectlist';
+            merefresh.refreshOption.noMoreSize = 10;
+            merefresh.refreshOption.getNum = 3;
+
+
+            var requestState = idx + 1;
+            merefresh.refreshOption.refreshParm = {
+                itemtype: requestState
+            }
+
+            //页面 <刷新> 的回调
+            merefresh.refreshOption.refresh_cb = function (refresh, d) {
+                var list = d.data || [];
+                refresh.successEndRef(list && list.length, d.totalCount || 0);
+                if (d.code == 1) {
+                    list = dealListData(list);
+                    var html = template('tp_cellId_' + curPageIdx, list);
+                    merefresh.appendHtml(html);
+                    dealStar('.starMark');
+
+                    editComplectUI();
+                    initCheck();
+                } else {
+                    Comm.message(d.msg);
+                }
+            };
+            merefresh.configurationDone('refreshId' + idx, 'id_list' + idx);
+            pageRefArr[idx] = merefresh;
+        } else {
+
+        }
+    }
+
+
+    function dealListData(showArr) {
+
+        if (curPageIdx == 0) {
+            showArr.forEach(function (ele, idx) {
+                ele.tags = [];
+                if (ele.spicaldict && ele.spicaldict && ele.spicaldict.length) {
+                    ele.tags = ele.spicaldict.split(',')
+                }
+            })
+        } else if (curPageIdx == 1) {
+            showArr.forEach(function (ele, idx) {
+                ele.tags = [];
+                if (ele.docspical && ele.docspical && ele.docspical.length) {
+                    ele.tags = ele.docspical.split(',')
+                }
+            })
+        } else if (curPageIdx == 2) {
+
+            var flag = false;
+
+            showArr.forEach(function (ele, idx) {
+                ele.tags = [];
+                if (ele.face && ele.face && ele.face.length) {
+                    var imgs = ele.face.split(',') || [];
+                    if (imgs.length >= 3) {
+                        ele.showType = 3;
+                        ele.imgs = imgs.splice(0, 3);
+                    } else {
+                        flag = !flag;
+                        ele.showType = flag ? 1 : 2;
+                        ele.imgs = imgs.splice(0, 3);
+                    }
+                    ele.head = ele.imgs[0];
+                }
+            })
+        }
+
+        return showArr;
+    }
+
+
+    function cellClicked(cellType, itemId, enable) {
+
+        console.log('cellType == ' + cellType + 'itemId = ' + itemId + 'isEdit = ' + isEdit);
+
+        if (!itemId || isEdit) return;
+
+        switch (cellType) {
+            case 1: {
+                Comm.go('clinicDetails.html?cid=' + itemId);
+            }
+                break;
+            case 2: {
+                Comm.go('docDetail.html?did=' + itemId);
+            }
+                break;
+
+            case 3: {
+                Comm.go('artical.html?type=1&aid=' + itemId)
+            }
+                break;
+
+            default:
+                break;
+
+        }
+
+    }
+</script>
+
+
+<!--------------------------------------------诊所-------------------------------------------->
+<script type="text/html" id="tp_cellId_0">
+    {{each $data model i}}
+
+    <div class="flex_start bg_white mt10 rcm_goodsCell">
+        <div class="check lIcon cellSel hide" sid="{{model.cuscollectid}}"></div>
+        <div class="flex flexItem_between mainW" onclick="cellClicked(1,{{model.clinicid}})">
+            <img class="faceImg bg_lgray br5 placeImg" src="{{OSS(model.head,'s')}}" onerror="app.herrorimg(this);">
+
+            <div class="flex1 flex flexItem_v flexItem_between marl15">
+
+                <div class="flex">
+                    <div class="rcm_title f16 bold TBreak autoTextW baseWH" style="width: 0">
+                        <p class="mainW wordW">{{model.clinicname||''}}</p>
+                    </div>
+                </div>
+
+
+                <div class="rcm_info baseWH mt5 mb5 flex_between col_sub">
+
+                    <div class="evaluate flex_start">
+                        <div class="starMark bg_place" star="{{model.avgvalue||0}}"></div>
+                        <div class="f12 lineSpan">
+                            <span class="col_theme ml5 point">{{model.avgvalue||0.0}}分</span>
+                            <span class="col_lgray f14 lineV">丨</span>
+                            <span>已服务{{model.servercount||0}}人</span>
+                        </div>
+                    </div>
+
+                    <!--<div class="f12 col_sub999">2.3km</div>-->
+
+                </div>
+
+                <div class="rcm_tag flex_wrap baseWH">
+                    {{each model.tags tid i}}
+                    <div class="tagLabel">{{getTag(tid)}}</div>
+                    {{/each}}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    {{/each}}
+</script>
+
+<!--------------------------------------------医生-------------------------------------------->
+<script type="text/html" id="tp_cellId_1">
+    {{each $data model i}}
+
+    <div class="flex_start bg_white mt10 rcm_goodsCell">
+        <div class="check lIcon cellSel hide" sid="{{model.cuscollectid}}"></div>
+        <div class="flex flexItem_between mainW" onclick="cellClicked(2,{{model.doctorid}})">
+            <img class="faceImg bg_lgray br5 placeImg doctor halfBr" src="{{OSS(model.dochead,'s')}}"
+                 onerror="app.herrorimg(this);">
+
+            <div class="flex1 flex flexItem_v flexItem_between marl15">
+
+                <div class="flex">
+                    <div class="rcm_title f16 bold TBreak autoTextW" style="width: 0">
+                        <p class="mainW wordW">{{model.docname||''}}</p>
+                    </div>
+                </div>
+
+
+                <div class="rcm_info baseWH mt5 mb5 flex_between col_sub">
+
+                    <div class="evaluate flex_start">
+                        <div class="starMark bg_place" star="{{model.avgvalue||0}}"></div>
+                        <div class="f12 lineSpan">
+                            <span class="col_theme ml5 point">{{model.avgvalue||0}}分</span>
+                            <span class="col_lgray f14 lineV">丨</span>
+                            <span>已服务{{model.servercount||''}}人</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="rcm_tag flex_wrap baseWH">
+                    {{each model.tags tid i}}
+                    <div class="tagLabel">{{getTag(tid)}}</div>
+                    {{/each}}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {{/each}}
+</script>
+
+
+<script type="text/html" id="tp_cellId_2">
+
+    {{each $data as model i}}
+
+    {{if model.showType == 3}}
+
+
+    <div class="p15 mt10 bg_white flex_start">
+
+        <div class="check lIcon cellSel hide" sid="{{model.cuscollectid}}"></div>
+        <div class="mainW" onclick="cellClicked(3,{{model.articleid}})">
+
+            <div class="f17 TBreak wordW">{{model.articlename||''}}</div>
+
+            <div class="pt10 pb10 flex_between">
+
+
+                {{each model.imgs imgUrl j}}
+
+                <div class="threeImg">
+                    <div class="wrap">
+                        <div class="wrap_ct imgContain">
+                            <img class="placeImg" alt="" src="{{OSS(imgUrl,'s')}}" onerror="app.errorimg(this);">
+                        </div>
+                    </div>
+                </div>
+
+                {{/each}}
+
+            </div>
+
+
+            <div class="flex_between">
+                <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+                <div class="lIcon scan">{{getCount(model.readcount||0)}}万阅读</div>
+            </div>
+
+
+        </div>
+    </div>
+
+    {{else if model.showType == 1}}
+
+    <div class="p15 mt10 bg_white flex_start">
+        <div class="check lIcon cellSel hide" sid="{{model.cuscollectid}}"></div>
+        <div class="mainW" onclick="cellClicked(3,{{model.articleid}})">
+            <div class="topImg">
+                <div class="wrap">
+                    <div class="wrap_ct imgContain">
+                        <img class="placeImg" alt="" src="{{OSS(model.head,'m')}}" onerror="app.errorimg(this);">
+                    </div>
+                </div>
+            </div>
+
+            <div class="f17 TBreak wordW pt10 pb10 baseWH">{{model.articlename||''}}</div>
+
+            <div class="flex_between">
+                <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+                <div class="lIcon scan">{{getCount(model.readcount||0)}}阅读</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    {{else if model.showType == 2}}
+
+    <div class="p15 mt10 bg_white flex_start">
+
+        <div class="check lIcon cellSel hide" sid="{{model.cuscollectid}}"></div>
+
+        <div class="mainW" onclick="cellClicked(3,{{model.articleid}})">
+
+            <div class="flex flexItem_between mainW">
+
+
+                <div class="flex1 flex flexItem_v flexItem_between">
+                    <div class="f17 TBreak wordW2 mb5 baseWH">{{model.articlename||''}}</div>
+
+                    <div class="flex_between">
+                        <div class="lIcon time">{{formatDate(model.subdate,'Y-m-d')}}</div>
+                        <div class="lIcon scan">{{getCount(model.readcount||0)}}阅读</div>
+                    </div>
+                </div>
+
+
+                <div class="rightImg imgContain ml10">
+                    <img class="placeImg" alt="" src="{{OSS(model.head,'s')}}" onerror="app.errorimg(this);">
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {{/if}}
+
+
+    {{/each}}
+
+</script>
+
+
+</body>
+
+</html>

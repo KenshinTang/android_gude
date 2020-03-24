@@ -1,0 +1,454 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>诊所</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/side/side.css">
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+
+    <style>
+
+        .position {
+            background-image: url("img/position.png");
+        }
+
+        /*search header*/
+        .searchBar {
+            height: 30px;
+            margin: 7px 0%;
+            line-height: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .searchBar.lIcon {
+            background-position-x: 15px;
+            padding-left: 35px;
+            background-image: url("img/sousuo.png");
+            color: #A8ADBA;
+            background-size: 12px;
+        }
+
+        .filterBar {
+            height: 45px;
+        }
+
+        .filterBar > .active {
+            color: #EF5F1E;
+        }
+
+        .topBarOptd.rIcon {
+            background-image: url("img/down_gray.png");
+            background-size: 7px auto;
+            padding-right: 12px;
+            background-position-x: right;
+        }
+
+        .topBarOptd.rIcon.upDown {
+            background-image: url("img/up_g.png");
+            background-size: 7px auto;
+            padding-right: 12px;
+            background-position-x: right;
+        }
+
+
+        /*.topBarOptd.rIcon.active {*/
+            /*background-image: url("img/down_orange.png");*/
+            /*background-size: 7px auto;*/
+            /*padding-right: 12px;*/
+            /*background-position-x: right;*/
+        /*}*/
+
+
+
+
+        .showFilter{
+            position: relative;
+        }
+
+        /*筛选项 、 蒙层*/
+        .showFilter>.mask,.showFilter>.filterOption{
+            display: none;
+        }
+
+        .showFilter.active>.mask,.showFilter.active>.filterOption{
+            display: block;
+        }
+
+
+        .mask {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            width: 100%;
+            height: 1000px;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .filterOption {
+            padding-left: 20px;
+            position: absolute;
+            top: 45px;
+            height: 180px;
+            width: 100%;
+            background-color: white;;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            z-index: 1;
+        }
+
+        .filterOption > .option {
+            color: #333333;
+            line-height: 45px;
+            min-height: 45px;
+        }
+
+        .filterOption > .option.active {
+            color: #EF5F1E;
+            background: url("img/mark.png") right 10px center no-repeat;
+            background-size: 14px 11px;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+<header>
+
+    <div class="navBar flex_between">
+        <div class="headItem rIcon position marl15 base80" onclick="Comm.go('choosePosition.html')"></div>
+        <div class="headItem flex1 mr10" onclick="Comm.go('searchPage.html?type=shop')">
+            <div class="searchBar bg_lgray lIcon f12">
+                请输入诊所名称
+            </div>
+        </div>
+    </div>
+
+
+    <!--筛选-->
+    <!--showFilter-->
+    <div class="relative f15 showFilter">
+        <div class="filterBar flex_around bottomBorder">
+            <div class="topBarOptd rIcon zslb" onclick="fillEleOption(0,true);">诊所类别</div>
+            <div class="topBarOptd rIcon tc" onclick="fillEleOption(1,true);">特长</div>
+            <div class="topBarOptd rIcon" onclick="fillEleOption(2,false,this)">评分</div>
+            <div class="topBarOptd rIcon price" onclick="fillEleOption(3,false,this)">距离</div>
+        </div>
+
+        <div class="mask"></div>
+        <div class="filterOption"></div>
+
+    </div>
+
+</header>
+<!--******************************************************************************-->
+
+<section id="section" class="bg_lgray mescroll">
+
+    <div class="rcmList" id="list_id"></div>
+
+</section>
+
+<!--******************************************************************************-->
+<footer class="shared"></footer>
+<script src="js/area.js"></script>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+<script src="inc/side/side.js"></script>
+<script src="js/dict.js"></script>
+<script src="js/area.js"></script>
+<script src="inc/mescroll/mescroll.min.js"></script>
+
+
+<script>
+    var requestPamrm = {
+        avgvalue : 1,
+        longer:1
+    }, merefresh = null,PageM = {};
+
+    Foot.init();
+    Area.init();
+
+
+    function pageload() {
+        Comm.loading(1)
+        GDict.init(function () {
+            Comm.loading();
+            getPosition();
+            fillEleOption(0);
+            Comm.storage('startApp',function (d) {
+                if (d == 1) {
+                    Comm.db('startApp',1);
+                    getPosition();
+                    Comm.storageValue('startApp',2)
+                }
+            });
+
+        });
+
+        var maskH = $('body').height() - $('header').height() - $('footer').height();
+
+        $('.mask').height(maskH);
+
+    }
+
+
+
+
+    //条件选择项
+    function fillEleOption(typeIdx,show,target) {
+
+        $('.topBarOptd').removeClass('active');
+
+        if (show||target){
+            var ele = $('.topBarOptd')[typeIdx];
+            $(ele).addClass('active');
+        }
+
+
+
+
+        if (typeIdx == 2 || typeIdx == 3){
+            if (typeIdx == 2){
+                requestPamrm.longer = -1;
+                requestPamrm.avgvalue = requestPamrm.avgvalue == 1 ? 0 : 1
+            } else if (typeIdx == 3){
+                requestPamrm.avgvalue = -1;
+                requestPamrm.longer = requestPamrm.longer == 2 ? 1 : 2;
+            }
+
+            $(target).toggleClass('upDown');
+            console.log(requestPamrm);
+            addRefresh();
+            $('.showFilter').removeClass('active');
+            return;
+        }
+
+        if (show){
+            if (PageM.typeIdx == typeIdx){
+                $('.showFilter').toggleClass('active');
+            } else {
+                $('.showFilter').addClass('active');
+            }
+        }
+
+
+        if (!PageM.cliOptionEle || !PageM.spicalEle){
+            var leiBie = GDict.get('clinictype')||[];
+            leiBie.splice(0,0,{dictname:'全部',dictId:''});
+            var html = template('tp_id_option',leiBie);
+            PageM.cliOptionEle = html;
+            PageM.cliOptionEleCount = leiBie.length;
+
+
+            var teChang = GDict.get('spicaldict')||[];
+            teChang.splice(0,0,{dictname:'全部',dictId:''});
+            var html2 = template('tp_id_option',teChang);
+            PageM.spicalEle = html2;
+            PageM.spicalEleCount = teChang.length;
+        }
+
+        var count = 3;
+        if (typeIdx == 0){
+            $('.filterOption').html(PageM.cliOptionEle);
+            count = PageM.cliOptionEleCount;
+        } else if (typeIdx == 1){
+            $('.filterOption').html(PageM.spicalEle);
+            count = PageM.spicalEleCount;
+        }
+        if (count < 1) count = 3;
+        if (count > 5) count = 5;
+
+        var h = count * 45 + 'px';
+
+        $('.filterOption').css('height',h)
+
+
+        PageM.typeIdx = typeIdx;
+
+        meauChooseClick('.filterOption','.option',function (ele) {
+
+            var tid = $(ele).attr('tid');
+            var text = $(ele).text();
+
+             if (PageM.typeIdx == 0){
+                 requestPamrm.clinicdict = tid;
+                 PageM.cliOptionEle = $('.filterOption').html();
+                 $('.zslb').text(text.slice(0,4));
+             } else if (PageM.typeIdx == 1){
+                 requestPamrm.spicaldict = tid;
+                 PageM.spicalEle = $('.filterOption').html();
+                 $('.tc').text(text.slice(0,4));
+             }
+            $('.showFilter').removeClass('active');
+             addRefresh();
+        })
+    }
+
+
+
+
+
+
+    function pageresume() {
+
+        if (app.needLoginCheck()) {
+            app.clearUserData();
+        }
+        getPosition();
+    }
+
+
+    function getPosition(cb) {
+
+        var aaa = Comm.db('showArea');
+        Comm.db('showArea', null);
+
+        if (aaa) {
+            var position = UserJWD.JWD();
+            position.dis = aaa.text;
+            position.curdis = aaa.text;
+            position.aid = aaa.i;
+            Comm.db('JWD', position);
+        }
+
+        var startStatus = Comm.db('startApp')||1;
+
+        if (!UserJWD.hasGetPosition() || startStatus == 1) {
+            Comm.position(function (a) {
+                if (a.code == 1) {
+                    if (!UserJWD.hasGetPosition() || startStatus == 1) {
+                        Comm.db('startApp',2);
+                        UserJWD.saveJWDValue(a);
+                    } else {
+                        UserJWD.updateJWDValue(a);
+                    }
+                }
+                $('.position').text(UserJWD.dis());
+                cb && cb();
+                addRefresh();
+            })
+        } else {
+            $('.position').text(UserJWD.dis());
+            cb && cb();
+            addRefresh();
+        }
+
+    }
+
+
+    function addRefresh() {
+
+        requestPamrm.lng = UserJWD.lng();
+        requestPamrm.lat = UserJWD.lat();
+        requestPamrm.clinicareaid = UserJWD.aid();
+
+        if (!merefresh) {
+            merefresh = new MERefresh();
+            //网络请求参数
+            merefresh.refreshOption.refreshUrl = '/api/clinic/list';
+            merefresh.refreshOption.refreshParm = requestPamrm;
+
+            //页面 <刷新> 的回调
+            merefresh.refreshOption.refresh_cb = function (refresh, d) {
+                if (d.code == 1) {
+                    var list = d.data || [];
+                    list.forEach(function (ele,idx) {
+                        ele.tags = [];
+                        if (ele.spicaldict && ele.spicaldict && ele.spicaldict.length) {
+                            ele.tags = ele.spicaldict.split(',')
+                        }
+                    })
+
+                    refresh.successEndRef(list.length || 0, d.totalCount || 0);
+                    refresh.appendHtml(template('tp_cellId', list));
+                    dealStar('.starMark',10,2);
+                } else {
+                    Comm.message(d.msg);
+                }
+            };
+            merefresh.configurationDone('section', 'list_id');
+        } else {
+            merefresh.refreshFunction(merefresh);
+        }
+    }
+
+
+</script>
+
+
+<script type="text/html" id="tp_id_option">
+
+    {{each $data model i}}
+    <div class="option bottomBorder" tid="{{model.dictId}}">{{model.dictname}}</div>
+    {{/each}}
+
+</script>
+
+
+
+<script type="text/html" id="tp_cellId">
+
+    {{each $data model i}}
+
+    <div class="rcm_goodsCell flex flexItem_between mb10" onclick="Comm.go('clinicDetails.html?cid={{model.clinicid||0}}')">
+        <img class="faceImg bg_lgray br5 placeImg" src="{{OSS(model.head,'s')}}" onerror="app.errorimg(this);">
+
+        <div class="flex1 flex flexItem_v flexItem_between marl15">
+
+            <div class="flex baseWH">
+                <div class="rcm_title f16 bold TBreak autoTextW" style="width: 0">
+                    <p class="mainW wordW">{{model.clinicname||''}}</p>
+                </div>
+            </div>
+
+
+            <div class="rcm_info baseWH mt5 mb5 flex_between col_sub baseWH">
+
+                <div class="evaluate flex_start">
+                    <div class="starMark bg_place" star="{{model.avgvalue||0}}"></div>
+                    <div class="f12 lineSpan">
+                        <span class="col_theme ml5 point">{{model.avgvalue||0}}分</span>
+                        <span class="col_lgray f14 lineV">|</span>
+                        <span>已服务{{model.servercount||0}}人</span>
+                    </div>
+                </div>
+
+                <div class="f12 col_sub999">{{distance(model.distance)}}</div>
+
+            </div>
+
+            <div class="rcm_tag flex_wrap baseWH">
+                {{each model.tags tid i}}
+                <div class="tagLabel">{{getTag(tid)}}</div>
+                {{/each}}
+            </div>
+
+        </div>
+
+    </div>
+
+    {{/each}}
+
+</script>
+
+
+</body>
+
+</html>

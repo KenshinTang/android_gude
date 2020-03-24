@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>就诊人</title>
+    <link href="css/g.css" type="text/css" rel="stylesheet" />
+    <link href="css/comm.css" type="text/css" rel="stylesheet" />
+    <link href="inc/mescroll/mescroll.min.css" type="text/css" rel="stylesheet" />
+
+
+    <style>
+        .patientCell {
+            padding: 20px 15px;
+            background-color: white;
+            margin-top: 10px;
+            position: relative;
+        }
+
+
+        .editIcon {
+            position: absolute;
+            right: 0;
+            top: 35px;
+            bottom: 35px;
+            width: 60px;
+        }
+
+        .sureBtn {
+            width: 90%;
+            margin: 5px auto;
+            font-size: 16px;
+            text-align: center;
+            height: 45px;
+            line-height: 45px;
+            background: #ffffff;
+            border-radius: 23px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navBar bottomBorder">
+            <div class="navBackIcon" onclick="Comm.close();"></div>
+            <div class="navTitle">就诊人</div>
+        </div>
+    </header>
+
+    <section id="mescroll" class="mescroll bg_lgray">
+        <div id="listId">
+
+            <!--<div class="patientCell">-->
+            <!--<div class="flex_start f16">-->
+            <!--<div class="bold name">王晓丽</div>-->
+            <!--<div class="f16 tel ml10">182*****4457</div>-->
+            <!--</div>-->
+
+            <!--<div class="f12">-->
+
+            <!--<div class="flex_start mart20 marb15">-->
+            <!--<div class="marr25">性别：女</div>-->
+            <!--<div>身份证：530528199605265369</div>-->
+            <!--</div>-->
+
+            <!--<div>就诊号：6004 2588 693</div>-->
+
+            <!--</div>-->
+            <!---->
+            <!--<div class="editIcon flex_center" onclick="Comm.go('addPatient.html?tid=1')">-->
+            <!--<img src="img/edit.png" width="15" height="15">-->
+            <!--</div>-->
+            <!---->
+            <!--</div>-->
+
+        </div>
+
+    </section>
+
+    <footer class="bg_white">
+        <div class="sureBtn col_white bg_theme" onclick="add()">添加就诊人</div>
+    </footer>
+
+</body>
+
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/art-template.js"></script>
+
+<script src="inc/mescroll/mescroll.min.js"></script>
+
+
+
+<script type="text/javascript">
+    var userinfo = Comm.db("userinfo");
+    var merefresh = null,
+        PageM = {
+            pageType: Comm.query('type'), //choose = '选择就诊人'
+            orderModel: Comm.db('orderM'),
+            tempDic: {},
+        };
+    var count = 0;
+    var max = 0;
+
+    function add() {
+        if (count >= max) {
+            Comm.message('可添加就诊人数量已达上限');
+        } else {
+            Comm.go('addPatient.html')
+        }
+    }
+
+    function pageload() {
+        addRefresh();
+    }
+
+
+    function pageresume() {
+        merefresh.refreshFunction();
+    }
+
+
+    function addRefresh() {
+        var opt = {
+            keys: 'CUSPATIENT_LIMIT'
+        };
+        AJAX.POST('/api/config/bykeys', opt, function (a) { //注册
+            if (a.code == 1) {
+                max = Number(a.data[0].sysValue);
+            }
+        });
+        merefresh = new MERefresh();
+        //网络请求参数
+        merefresh.refreshOption.refreshUrl = '/api/cuspatient/list';
+
+        //页面 <刷新> 的回调
+        merefresh.refreshOption.refresh_cb = function (refresh, d) {
+            if (d.code == 1) {
+                var list = d.data || [];
+
+                PageM.tempDic = dealListWithModel(list, 'cuspatientid', PageM.tempDic);
+
+                refresh.successEndRef(list.length || 0, d.totalCount || 0);
+                count = list.length;
+                refresh.appendHtml(template('tp_id_patient', list));
+            } else {
+                refresh.successEndRef(0, 0);
+                refresh.MeRefScroll.endUpScroll(true);
+            }
+        };
+        merefresh.configurationDone('mescroll', 'listId');
+    }
+
+
+    function cellClicked(o, cid) {
+        if (PageM.pageType == 'choose') {
+            console.log(o);
+            console.log(cid);
+            PageM.orderModel.cuspatientid = cid;
+
+
+            Comm.db('orderM', PageM.orderModel);
+            Comm.db('cuspatM', PageM.tempDic[cid]);
+            Comm.close();
+        }
+    }
+
+    function editPatient(o, cid) {
+        event.stopPropagation();
+        Comm.go('addPatient.html?tid=' + cid || '')
+    }
+</script>
+
+
+<script type="text/html" id="tp_id_patient">
+    {{each $data model i}}
+
+    <div class="patientCell" onclick="cellClicked(this,{{model.cuspatientid}})">
+        <div class="flex_start f16 baseWH">
+            <div class="bold name">{{model.paname||''}}</div>
+            <div class="f16 tel ml10">{{sphone(model.paphone)}}</div>
+        </div>
+
+        <div class="f12">
+
+            <div class="flex_start mart20 marb15">
+                <div class="marr25">性别：{{getGender(model.pasex||0)}}</div>
+                <div>身份证：{{model.paidcard||''}}</div>
+            </div>
+
+            <div>就诊号：{{model.cuspatientid||''}}</div>
+
+        </div>
+
+
+        <div class="editIcon flex_center" onclick="editPatient(this,{{model.cuspatientid}});">
+            <img src="img/edit.png" width="15" height="15">
+        </div>
+
+
+    </div>
+
+    {{/each}}
+</script>
+
+
+</html>

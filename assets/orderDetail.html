@@ -1,0 +1,484 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>订单详情</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        body {
+            background: url("img/bg_detail.png") no-repeat top center;
+            background-size: 100% 225px;
+        }
+
+        .navBackIcon {
+            background-image: url("stIconfile/back_w.png");
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+
+
+        .topSus{
+            height: 160px;
+        }
+
+
+        .statuInfo {
+            margin: 0px 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+
+        .optionItem {
+            color: #EF5F1E;
+            border: 1px solid #EF5F1E;
+            width: 80px;
+            line-height: 28px;
+            border-radius: 14px;
+            text-align: center;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .optionItem.unImp {
+            color: black;
+            border: 1px solid #E5E5E5;
+        }
+
+        .clearSpace{
+            height: 15px;
+            width: 100%;
+        }
+
+
+
+        /*诊所信息*/
+        .borderFrame{
+            background-color: white;
+            margin: 15px;
+            margin-top: 0px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 0px 15px;
+        }
+
+        .frameCell{
+            padding: 15px 0px;
+            color: #212121 !important;
+        }
+
+        .frameCell .indicator{
+            padding-right: 10px;
+            background-position-x: right;
+        }
+
+        .leftText{
+            min-width: 80px;
+        }
+
+        .tagsContainer{
+            max-width: 50%;
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+<body class="bg_lgray">
+
+<!--******************************************************************************-->
+
+<header>
+    <div class="navBar bg_clear iosDeal">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navTitle col_white">订单详情</div>
+    </div>
+</header>
+
+
+<section class="scroll-y">
+
+
+</section>
+
+<!--******************************************************************************-->
+<footer>
+    <!--<div class="bg_trans m10 col_white center lh50 f17 submit" onclick="Comm.go('appointmentComplect.html')">确认预约</div>-->
+</footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dict.js"></script>
+<script src="js/art-template.js"></script>
+
+<script>
+    var oid = Comm.query('oid');
+
+    function pageload() {
+        if (oid){
+            addNeedRefPage('tabPage3',{oid:oid,type:1});
+            GDict.init(function () {
+                getDetail();
+            })
+        }
+    }
+
+    function pageresume(){
+        if (oid){
+            GDict.init(function () {
+                getDetail();
+            })
+        }
+    }
+
+
+
+    //获取预约订单详情
+    function getDetail() {
+        var parm = {
+            docappointmentid:oid
+        }
+
+        var loadEle = $('section');
+        app.loading(loadEle);
+        SLNetwork('post','/api/appointment/info', parm, function (data) {
+            Comm.loading();
+            if (data.code == 1) {
+                nslog(data);
+                var detail = data.data||{};
+                detail.tags = detail.docspical.split(',');
+
+                var Tmodel = {
+                    model : detail,
+                }
+
+                var html = template('tp_id_detail',Tmodel);
+                $('section').html(html);
+
+            } else {
+                Comm.message(data.msg);
+                app.loadFail(loadEle,1);
+            }
+        });
+    }
+
+    function failReload(tp){
+        getDetail();
+    }
+
+
+
+
+
+    //订单操作
+    function orderOption(type,oid,telOrDid,directlyDel) {
+        if (event) event.stopPropagation();
+        preventRepeadClickDeal(function () {
+
+            var apistr;
+            var mess = '确定要执行该操作吗?';
+
+            switch (type) {
+                case 1: {
+                    if (telOrDid){
+                        Comm.openUrlStr('tel:'+telOrDid);
+                    } else {
+                        Comm.message('无法联系到诊所');
+                    }
+                    return;
+                }
+                    break;
+
+                case 2: {
+                    //评价
+                    Comm.go('evaluate.html?oid='+oid);
+                    return;
+                }
+
+                case 3: {
+                    //再次预约
+                    Comm.go('docDetail.html?did='+telOrDid)
+                    return;
+                }
+
+                case 9: {
+                    apistr = '/api/appointment/cancel';
+                }
+                    break;
+
+                case 10: {
+                    //删除
+                    apistr = '/api/appointment/delete';
+                    Comm.db('del',true);
+                }
+                    break;
+
+                default:
+                    break;
+            }
+
+
+            if (!apistr || !apistr.length) return;
+
+            var parm = {
+                docappointmentid:oid
+            }
+
+
+            Comm.confirm(mess,function (t) {
+                if (t == 1){
+                    Comm.loading('正在处理...');
+                    SLNetwork('post',apistr, parm, function (data) {
+                        Comm.loading();
+                        if (data.code == 1) {
+                            if (type == 9) {//取消订单
+                                Comm.message('已取消预约');
+                                getDetail();
+                            } else if (type == 10) {//删除订单
+                                Comm.message('删除成功');
+                                Comm.close();
+                                return;
+                            }
+                        } else {
+                            Comm.message(data.msg);
+                        }
+                    });
+                }
+            });
+
+        },1,200)
+    }
+
+</script>
+
+
+<script type="text/html" id="tp_id_detail">
+
+
+    {{if model.status == 2}}
+    <div class="flex flexItem_v flexItem_between topSus">
+
+        <div class="flex_start">
+            <div class="f24 bold m15 mr5 col_white lh25">待就诊</div>
+            {{if model.status == 2}}
+            <div class="bold f16 col_white">【就诊序号: {{model.daynum ||''}}】</div>
+            {{/if}}
+        </div>
+
+        <div class="statuInfo shadow">
+
+            <div class="bold lh15">您还未就诊,请及时就诊</div>
+            <div class="flex_wrap optionBar mt10">
+                <div class="optionItem" onclick="orderOption(1,{{model.docappointmentid}},{{model.clinicphone}})">联系诊所</div>
+                <div class="optionItem unImp" onclick="orderOption(9,{{model.docappointmentid}})">取消预约</div>
+            </div>
+        </div>
+
+        <div class="iosDeal notIosHide"></div>
+    </div>
+    {{else if model.status == 3}}
+
+    <div class="flex flexItem_v flexItem_between topSus">
+        <div class="f24 bold m15 col_white lh25">待评价</div>
+
+        <div class="statuInfo shadow">
+
+            <div class="bold lh15">您已完成就诊，请对本次服务做出评价</div>
+            <div class="flex_wrap optionBar mt10">
+                <div class="optionItem" onclick="orderOption(2,{{model.docappointmentid}})">立即评价</div>
+                <div class="optionItem unImp" onclick="orderOption(1,{{model.docappointmentid}},{{model.clinicphone}})">联系诊所</div>
+            </div>
+        </div>
+
+        <div class="iosDeal notIosHide"></div>
+    </div>
+
+    {{else if model.status == 4}}
+    <div class="flex flexItem_v flexItem_between topSus">
+        <div class="f24 bold m15 col_white lh25">已完成</div>
+
+        <div class="statuInfo shadow">
+
+            <div class="bold lh15">您已完成就诊</div>
+            <div class="flex_wrap optionBar mt10">
+                <div class="optionItem" onclick="orderOption(3,{{model.docappointmentid}},{{model.doctorid}})">再次预约</div>
+                <div class="optionItem unImp" onclick="orderOption(10,{{model.docappointmentid}})">删除</div>
+            </div>
+        </div>
+
+        <div class="iosDeal notIosHide"></div>
+    </div>
+
+    {{else}}
+    <div class="flex flexItem_v flexItem_between topSus">
+        <div class="f24 bold m15 col_white lh25">已取消</div>
+
+        <div class="statuInfo shadow">
+
+            <div class="bold lh15">您已取消就诊</div>
+            <div class="flex_wrap optionBar mt10">
+                <div class="optionItem unImp" onclick="orderOption(10,{{model.docappointmentid}})">删除</div>
+            </div>
+        </div>
+
+        <div class="iosDeal notIosHide"></div>
+    </div>
+
+    {{/if}}
+
+    <div class="bg_clear clearSpace"></div>
+
+
+    <!--诊所信息-->
+    <div class="borderFrame">
+
+        <div class="frameCell flex_start" onclick="Comm.go('clinicDetails.html?cid={{model.clinicid}}')">
+            <div class="bold f16">{{model.clinicname||''}}</div>
+            <img src="stIconfile/identi_g.png" width="6" height="10" class="ml5">
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder" onclick="Comm.go('docDetail.html?did={{model.doctorid}}')">
+            <div>医生</div>
+            <div class="indicator">{{model.docname||''}}</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>科室</div>
+            <div class="flex_wrap tagsContainer">
+            {{each model.tags tid i}}
+                {{if i>0}}、{{/if}}
+                <div>{{getTag(tid)}}</div>
+            {{/each}}
+
+            </div>
+
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div class="leftText">营业时间</div>
+            <div class="tRight">{{model.targetdate||''}}（{{getWeekD(model.targetdate)}}）{{getAPm(model.targettype)}} {{if model.targettype == 0}}{{model.upworktime}}{{else}}{{model.downworktime}}{{/if}}</div>
+        </div>
+
+
+    </div>
+
+
+
+    <!--就诊人信息-->
+
+    <div class="borderFrame">
+
+        <div class="frameCell flex_start">
+            <div class="bold f16">就诊人信息</div>
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>姓名</div>
+            <div>{{model.cuspatientname||''}}</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>性别</div>
+            <div>{{getGender(model.cuspatientidsex)}}</div>
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>年龄</div>
+            <div>{{getAge(model.cuspatientbirthday)}}</div>
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>电话</div>
+            <div>{{model.cuspatientphone||''}}</div>
+        </div>
+
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>就诊卡号</div>
+            <div>{{model.cuspatientid||''}}</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>挂号费用</div>
+            <div>{{model.price||'0'}}元</div>
+        </div>
+
+
+
+
+    </div>
+
+
+    <!--订单信息-->
+    <div class="borderFrame">
+
+        <div class="frameCell flex_start">
+            <div class="bold f16">订单信息</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>订单号</div>
+            <div>{{model.appointmentsn||''}}</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div class="leftText">预约时间</div>
+            <div class="tRight">{{model.targetdate||''}}（{{getWeekD(model.targetdate)}}）{{getAPm(model.targettype)}} {{if model.targettype == 0}}{{model.upworktime}}{{else}}{{model.downworktime}}{{/if}}</div>
+        </div>
+
+
+
+        {{if model.status == 3}}
+        <!--待评价-->
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div class="leftText">就诊时间</div>
+            <div>{{formatDate(model.checkdate,'Y-m-d H:i')}}</div>
+        </div>
+        {{else if model.status == 4}}
+        <!--已完成-->
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div class="leftText">就诊时间</div>
+            <div>{{formatDate(model.checkdate,'Y-m-d H:i')}}</div>
+        </div>
+
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>评价时间</div>
+            <div>{{formatDate(model.commentdate,'Y-m-d H:i')}}</div>
+        </div>
+        {{else if model.status == 0}}
+        <!--已取消-->
+        <div class="frameCell flex_between p15 bottomBorder">
+            <div>取消原因</div>
+            <div>{{getReson(model.cancelstatus)}}</div>
+        </div>
+        {{/if}}
+
+    </div>
+
+
+</script>
+
+
+
+</body>
+
+</html>

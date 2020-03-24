@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.yunlinker.gdbs.MapviewActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/daohang"
+            android:background="#ffffff">
+
+            <ImageView
+                android:id="@+id/map_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                app:srcCompat="@drawable/back_w" />
+
+            <TextView
+                android:id="@+id/map_title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="位置信息"
+                android:layout_centerHorizontal="true"
+                android:textSize="18sp"
+                android:textColor="#000000"
+                />
+
+        </RelativeLayout>
+
+        <com.baidu.mapapi.map.MapView
+            android:layout_below="@+id/daohang"
+            android:id="@+id/bmapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="#ffffff"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/relativeLayout">
+            <TextView
+                android:id="@+id/dididid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="位置"
+                android:textSize="18sp"
+                android:textColor="#000000"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"/>
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_below="@+id/dididid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="航利中心1栋一单元902"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                />
+
+            <ImageView
+                android:id="@+id/play_daohang"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="10dp"
+                android:padding="15dp"
+                app:srcCompat="@drawable/dao" />
+
+        </RelativeLayout>
+
+
+
+
+    </RelativeLayout>
+
+</LinearLayout>

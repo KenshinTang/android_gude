@@ -1,0 +1,748 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>诊所详情</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/mescroll/swiper.min.css">
+    <link rel="stylesheet" href="inc/mescroll/mescroll.min.css">
+    <link rel="stylesheet" href="inc/side/side.css">
+
+    <style>
+        .navItemIcon {
+            background-image: url("img/share_w.png");
+        }
+
+        .collectionItem {
+            background-image: url("img/xin_w.png");
+        }
+
+        .collectionItem.active {
+            background-image: url("img/xin_s.png");
+        }
+
+        .navBackIcon {
+            background-image: url("stIconfile/back_w.png");
+        }
+
+        .navBar {
+            background-color: unset;
+            background-color: rgba(0, 0, 0, 0);
+            position: absolute;
+            z-index: 1002;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .swiper-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* 展示诊所、更多 */
+        .mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1000px;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2;
+        }
+
+        .clinicInfo {
+            position: absolute;
+            bottom: 0px;
+            left: 15px;
+            right: 15px;
+            height: 100px;
+            background-color: white;
+            z-index: 100;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .clinicInfo.active {
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .maskCt .mask,
+        .maskCt.active .more {
+            display: none;
+        }
+
+        .maskCt.active .mask {
+            display: block;
+        }
+
+        .more {
+            margin-left: 10px;
+            background-image: url("img/down_gray.png");
+            background-size: 7px 4px;
+            padding-right: 15px;
+        }
+
+        .showDisableScroll.active {
+            overflow: hidden !important;
+        }
+
+        .packUp {
+            background: url("img/up_g.png") no-repeat center bottom;
+            background-size: 13px 8px;
+        }
+
+        .infoTT {
+            padding: 20px 0px 10px 0px;
+        }
+
+        .subTT {
+            padding-bottom: 10px;
+        }
+
+        /*地址*/
+        .address {
+            margin: 0px 15px;
+            line-height: 25px;
+            min-height: 65px;
+            padding: 15px 0px;
+        }
+
+        .openTime {
+            margin: 0px 15px;
+            line-height: 25px;
+            min-height: 65px;
+            padding: 15px 0px;
+        }
+
+        .aroundV {
+            margin-left: 30px;
+            margin-right: 20px;
+            width: 45px;
+        }
+    </style>
+
+
+    <style>
+        .famousDoc {
+            padding: 15px;
+            padding-top: 0px;
+        }
+
+        .famousDoc .head {
+            padding: 20px 0px;
+        }
+
+        .docInfo {
+            width: 120px;
+            margin: 7px;
+        }
+
+        .col_1212 {
+            color: #212121;
+        }
+
+        .docFace {
+            height: 45px;
+            width: 45px;
+            border-radius: 50%;
+            margin: 10px;
+        }
+
+        .orderItem {
+            height: 16px;
+            border-radius: 8px;
+            line-height: 16px;
+            width: 40px;
+        }
+
+        .evaImg {
+            width: 70px;
+            height: 70px;
+        }
+    </style>
+
+    <style>
+        .evaluate {
+            padding: 0px 15px;
+        }
+
+        .ev_head {
+            display: table;
+            padding-top: 20px;
+            padding-bottom: 5px;
+        }
+
+        .btText {
+            display: table-cell;
+            /*按照单元格的样式显示元素*/
+            vertical-align: bottom;
+        }
+
+        .evaCell {
+            padding-top: 15px;
+            padding-bottom: 20px;
+        }
+
+        .browser {
+            max-width: 260px;
+        }
+
+        .commentList {
+            min-height: 100px;
+        }
+
+        .detailContent{
+            min-height: 60px;
+        }
+
+
+        .shadowTop{
+
+            /*-moz-box-shadow:0px -100px 110px white;*/
+            /*-webkit-box-shadow:0px -100px 110px white;*/
+            /*box-shadow:0px -100px 110px white;*/
+
+
+            position: absolute;
+            height: 100px;
+            bottom: 0px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+
+
+            /*background: -webkit-linear-gradient(bottom, #EF5F1E 0, #FFA044 100%);*/
+            /*background: -moz-linear-gradient(bottom, #EF5F1E 0, #FFA044 100%);*/
+            /*background: -o-linear-gradient(bottom, #EF5F1E 0, #FFA044 100%);*/
+            background: linear-gradient(to top, white 0, transparent 100%);
+            /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFA044, endColorstr=#EF5F1E, GradientType=0);*/
+        }
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+    <!--******************************************************************************-->
+
+    <header></header>
+
+    <div class="navBar relative">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navItemIcon collectionItem mr10" onclick="clinitCollection(this);"></div>
+        <div class="navItemIcon shareItem mr10" onclick="shareMessage();"></div>
+    </div>
+
+
+    <section class="showDisableScroll mescroll" id="refreshId0">
+
+
+
+        <div class="detailContent"></div>
+
+        <div class="commentList">
+
+            <div class="bg_white evaluate">
+                <div class="ev_head flex_start">
+                    <div class="bold f16 btText">服务评价</div>
+                    <div class="f12 btText totleCount"></div>
+                </div>
+
+                <div class="evaluatList bg_lgray" id="list0">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer></footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dict.js"></script>
+    <script src="js/art-template.js"></script>
+    <script src="inc/mescroll/swiper.min.js"></script>
+    <script src="inc/mescroll/mescroll.min.js"></script>
+    <script src="inc/imageView/imageview.js"></script>
+    <!--<script src="inc/side/side.js"></script>-->
+
+
+    <script>
+        var PageM = {
+            showMask: false,
+            clinicid: Comm.query('cid') || '',
+        };
+        var merefresh = null;
+
+        $('section').on('scroll', function () {
+            var top = $('section').scrollTop();
+            console.log(top);
+
+            var alpha = top / 100;
+            $('.navBar').css('background-color', 'rgba(255, 160, 68, ' + alpha + ')');
+        })
+
+
+        function pageload() {
+
+            if (Comm.query('share')) {
+                $('.navBar div,header').remove();
+                $('footer').html(footCt);
+                Comm.resizeSection();
+            }
+
+
+            if (!PageM.clinicid) return;
+            Comm.loading(1);
+            // app.loading($('.detailContent'));
+            GDict.init(function () {
+                getClinicDetail();
+            });
+
+            checkIsCollection($('.collectionItem'), PageM.clinicid, 1);
+        }
+
+
+        //获取诊所详情
+        function getClinicDetail() {
+            var params = {
+                clinicid: PageM.clinicid
+            };
+            SLNetwork('get', '/api/clinic/info', params, function (a) {
+
+
+                Comm.loading();
+                if (a.code == 1) {
+                    var dataModel = a.data || {
+                        info: {},
+                        doc: []
+                    };
+                    var info = dataModel.info || {};
+                    var docs = dataModel.doc || [];
+
+                    PageM.detail = dataModel;
+
+                    { //处理诊所信息
+                        if (info.banner && info.banner) {
+                            info.bannerImgs = info.banner.split(',')
+                        }
+
+                        info.tags = [];
+                        if (info.spicaldict && info.spicaldict.length) {
+                            info.tags = info.spicaldict.split(',')
+                        }
+                    }
+
+                    { //处理医生信息
+                        docs.forEach(function (doctor, idx) {
+                            doctor.tags = [];
+                            if (doctor.docspical && doctor.docspical.length) {
+                                doctor.tags = doctor.docspical.split(',')
+                            }
+                        });
+                    }
+
+                    $('.detailContent').html(template('tp_id_cliDetail', dataModel));
+                    getEvaluationList();
+                    initSwiper();
+
+                    if (Comm.query('share')) {
+                        replaceBindClick('section *');
+                    }
+                } else {
+                    Comm.getMessageError();
+                    // Comm.message(a.msg);
+                    if (a.msg.indexOf('当前诊所不存在') > -1){
+                        setTimeout(function () {
+                            Comm.close();
+                        }, 300);
+                    }
+                }
+            });
+        }
+
+
+        function clinitCollection(ele) {
+            if (!PageM.clinicid) return;
+            collectionClicked(ele, PageM.clinicid, 1);
+        }
+
+
+        function getEvaluationList() {
+
+            if (!merefresh) {
+
+                merefresh = new MERefresh();
+
+                merefresh.refreshOption.refreshUrl = '/api/comment/list';
+                merefresh.refreshOption.noMoreSize = 2;
+                merefresh.refreshOption.refreshParm = {
+                    clinicid: PageM.clinicid,
+                };
+
+
+                //页面 <刷新> 的回调
+                merefresh.refreshOption.refresh_cb = function (refresh, d) {
+
+                    if (d.code == 1) {
+                        var list = d.data || [];
+                        refresh.successEndRef(list.length, d.totalCount || 0);
+
+                        var model = d || {
+                            data: []
+                        };
+                        model.data = model.data || [];
+                        PageM.evaluModel = model;
+                        var html = template('tp_id_comment', PageM.evaluModel);
+
+                        $('.totleCount').text('(' + d.totalCount + ')');
+                        merefresh.appendHtml(html);
+                        dealStar('.starMark', 8, 3);
+                        dealStar('.starMark1');
+                    } else {
+                        Comm.message(d.msg);
+                    }
+
+                };
+
+                merefresh.configurationDone('refreshId0', 'list0');
+            } else {
+
+            }
+        }
+
+
+        //获取评价
+        // function getEvaluationList() {
+        //     app.loading($('.commentList'));
+        //     var params = {
+        //         clinicid: PageM.clinicid,
+        //     }
+        //     SLNetwork('get', '/api/comment/list', params, function (data) {
+        //         if (data.code == 1) {
+        //             var model = data || {data: []};
+        //             model.data = model.data || [];
+        //             PageM.evaluModel = model;
+        //             var html = template('tp_id_comment', PageM.evaluModel);
+        //             $('.commentList').html(html);
+        //         } else {
+        //             app.loadFail($('.commentList'));
+        //         }
+        //     });
+        // }
+
+        function failReload() {
+            getEvaluationList();
+        }
+
+
+        function initSwiper() {
+            var mySwiper = new Swiper('.swiper-container', {
+                // 轮播图的方向，也可以是vertical方向
+                direction: 'horizontal',
+                //播放速度
+                loop: true,
+                // 自动播放时间
+                autoplay: 2000,
+                // 播放的速度
+                speed: 500,
+                // 这样，即使我们滑动之后， 定时器也不会被清除
+                autoplayDisableOnInteraction: false,
+            });
+        }
+
+
+        //收起、展开
+        function showMore() {
+            PageM.showMask = !PageM.showMask;
+
+            if (PageM.showMask) {
+                $('.showDisableScroll,.maskCt,.clinicInfo').addClass('active');
+            } else {
+                $('.showDisableScroll,.maskCt,.clinicInfo').removeClass('active');
+            }
+
+
+            var mainH = document.body.offsetHeight;
+            var h = PageM.showMask ? mainH - 200 - 10 : 100;
+            var savaArea = Comm.db('safeArea') || {
+                top: 0,
+                bottom: 0
+            };
+            var bt = PageM.showMask ? (h - 100 - (savaArea.bottom)) : 0; //savaArea.top +
+
+            $(".clinicInfo").css('bottom', 0 - bt);
+            $(".clinicInfo").height(h);
+
+            $(".maskInfoCt").height(bt - 40);
+        }
+
+
+        function contactClinic(tel) {
+            if (!app.needLoginCheck(true)) {
+                preventRepeadClickDeal(function () {
+                    Comm.openUrlStr('tel:' + tel)
+                }, 100);
+            }
+        }
+
+        function showNavigation(lat, lng, detail) {
+            var navModel = {
+                lat: lat,
+                lng: lng,
+                addr: detail
+            };
+            Comm.navigation(navModel);
+        }
+
+
+        //点击分享
+        function shareMessage() {
+
+            if (PageM.clinicid) {
+                preventRepeadClickDeal(function () {
+                    Comm.shareUrl({
+                        platform: '',
+                        pic: config.SLShareBase + 'img/appLogoIcon.png', //分享图片路径
+                        title: PageM.detail.info.clinicname, //分享标题
+                        desc: PageM.detail.info.info, //分享描述
+                        url: config.SLShareBase + 'clinicDetails.html?share=1&cid=' + PageM.clinicid
+                    }, function (d) { //回调
+                        if (d == 1) {
+                            Comm.message("分享成功");
+                        }
+                    });
+                }, 3);
+            }
+
+        }
+    </script>
+
+
+    <!--广告-->
+    <script type="text/html" id="tp_bannerId">
+        {{each $data model i}}
+        <li class="imgCt_cover br5 ohide" onclick="showAdver('{{model.advertid}}');">
+            <img src="{{OSS(model.face,'m')}}" class="bannerImg" alt="" onerror="app.errorimg(this);">
+        </li>
+        {{/each}}
+    </script>
+
+
+    <!--详情-->
+    <script type="text/html" id="tp_id_cliDetail">
+        <div class="relative maskCt">
+
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+
+                    {{each info.bannerImgs imgUrl i}}
+                    <div class="swiper-slide">
+                        <img class="placeImg mainH mainW" src="{{OSS(imgUrl,'m')}}" onerror="app.errorimg(this)">
+                    </div>
+                    {{/each}}
+
+                </div>
+            </div>
+
+
+            <div class="mask"></div>
+
+            <div class="clinicInfo br5 center shadow">
+
+                <div style="min-height: 70px;">
+                    <div class="f16 bold baseWH textHide">{{info.clinicname||''}}</div>
+
+                    <div class="rcm_tag flex_center lh15 mt5 mb5">
+
+                        {{each info.tags tid i}}
+                        {{if getTag(tid)}}<div class="tagLabel textHide">{{getTag(tid)}}</div>{{/if}}
+                        {{/each}}
+
+                    </div>
+
+
+                    <div class="flex_center">
+                        <div class="evaluate flex_start">
+                            <div class="starMark bg_place" star="{{info.avgvalue||0}}"></div>
+                            <div class="f12 lineSpan">
+                                <span class="col_theme ml5 point">{{onePoint(info.avgvalue)||'0.0'}}分</span>
+                                <span class="col_lgray f14 lineV">丨</span>
+                                <span class="col_lgray">已服务{{info.servercount||0}}人</span>
+                                <span class="more rIcon col_lgray" onclick="showMore();">更多</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div></div>
+
+                <div class="maskInfoCt scroll-y tleft">
+
+                    <div>
+                        <div class="bold infoTT f16">医疗类型</div>
+                        <div class="subTT f12">{{getTag(info.clinicdict)}}</div>
+                    </div>
+
+                    <div>
+                        <div class="bold infoTT f16">特长</div>
+                        <div class="subTT f12">
+                            {{each info.tags tid i}}
+                            {{getTag(tid)}}
+                            {{if i>0}}&nbsp;{{/if}}
+                            {{/each}}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bold infoTT f16">诊所简介</div>
+                        <div class="subTT f12 baseWH">
+                            {{info.info||''}}
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <div class="packUp baseWH h30 lh30" onclick="showMore()"></div>
+
+            </div>
+
+            <div class="shadowTop"></div>
+        </div>
+
+
+        <div>
+            <div class="pt10"></div>
+            <div class="address flex_around bottomBorder">
+
+                <img src="img/position2.png" width="13">
+
+
+                <div class="f12 TBreak autoTextW ml10 lh15" style="width: 0"
+                    onclick="showNavigation('{{info.cliniclat}}','{{info.cliniclng}}','{{info.cliniclocate}}')">
+                    <p class="mainW wordW mb5">{{info.cliniclocate}}</p>
+                    <p class="mainW wordW col_sub999">
+                        距离您{{if longUrl}}{{longUrl}}{{/if}}{{if !longUrl}}{{getLong(info.cliniclat,info.cliniclng)}}{{/if}}
+                    </p>
+                </div>
+
+                {{if info.clinicphone}}
+                <div class="flex_between aroundV" onclick="contactClinic('{{info.clinicphone}}');">
+                    <img src="img/line_v.png" width="1" class="">
+                    <img src="img/phone.png" width="13" class="">
+                </div>
+                {{/if}}
+
+            </div>
+
+
+            <div class="openTime flex_start">
+
+                <img src="img/time_or.png" width="13">
+                <div class="f12 TBreak autoTextW wordW ml10 baseWH">营业时间：上午 {{info.upworktime || ''}} 下午
+                    {{info.downworktime||''}}</div>
+            </div>
+
+            <div class="bg_lgray linebod"></div>
+        </div>
+
+
+        <!--诊所名医-->
+        <div class="famousDoc">
+            <div class="bold f16 head">诊所名医</div>
+
+            <div class="flex center scroll-x">
+
+
+                {{each doc doctor i}}
+
+                <div class="docInfo shadow br3">
+                    <div onclick="Comm.go('docDetail.html?did={{doctor.doctorid}}')">
+                        <img class="placeImg docFace" src="{{OSS(doctor.dochead,'s')}}" onerror="app.herrorimg(this)">
+
+                        <div class="bold baseWH textHide">{{doctor.docname||''}}</div>
+                        <div class="col_1212 f12 m5 baseWH wordW textHide">
+                            {{each doctor.tags tid i}}
+                            {{getTag(tid)}}&nbsp;
+                            {{/each}}
+                        </div>
+
+                        <div class="point col_theme f12 flex_center m5">
+                            <div class="starMark bg_place" star="{{doctor.avgvalue||0}}"></div>
+                            <div class="ml5">{{doctor.avgvalue||0.0}}分</div>
+                        </div>
+                    </div>
+                    <div class="f10 flex_between col_1212 m10"
+                        onclick="Comm.go('docDetail.html?tz=1&did={{doctor.doctorid}}')">
+                        <div class="wordW">已服务:{{doctor.servercount||0}}人</div>
+                        <div class="bg_theme col_white orderItem">预约</div>
+                    </div>
+
+                </div>
+
+                {{/each}}
+
+                <div class="baseWH"></div>
+            </div>
+        </div>
+    </script>
+
+
+    <script type="text/html" id="tp_id_comment">
+        {{each data model i}}
+
+        <div class="bg_white evaCell marb10">
+            <div class="flex flex_between">
+                <div class="flex">
+                    <span class="marr10">
+                        <img src="{{OSS(model.head)}}" onerror="app.herrorimg(this)" width="30px" height="30px"
+                            style="border-radius: 15px">
+                    </span>
+                    <div>
+                        <div class="baseWH">{{model.phone||''}}</div>
+                        <div class="starMark1" star="{{model.sevalue||0}}"></div>
+                    </div>
+                </div>
+                <div class="f12 col_lgray">{{formatDate(model.createdate,'Y-m-d H:i')}}</div>
+            </div>
+            <div class="marl10 marr10 mart15">
+                <div class="marb10 baseWH">{{model.content||''}}</div>
+                <div class="browser" id="showImgId_13" onclick="addPhotoBroswer('showImgId_13')">
+
+                    {{each imgList imgUrl j}}
+
+                    <img src="http://shuicheche.oss-cn-hangzhou.aliyuncs.com/2019_07/aa8k6ccv2qp5nrewc.jpg/250"
+                        big="http://shuicheche.oss-cn-hangzhou.aliyuncs.com/2019_07/aa8k6ccv2qp5nrewc.jpg/800"
+                        onerror="app.errorimg(this);" class="marr10 mt10 evaImg">
+
+                    {{/each}}
+
+
+                </div>
+
+            </div>
+        </div>
+        {{/each}}
+    </script>
+
+
+</body>
+
+</html>

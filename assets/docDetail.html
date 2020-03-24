@@ -1,0 +1,606 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no,email=no,adress=no" />
+
+    <title>医生详情</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+    <link rel="stylesheet" href="inc/mescroll/swiper.min.css">
+    <link rel="stylesheet" href="inc/caculate/SLCaculate.css">
+
+
+    <style>
+        .navItemIcon {
+            background-image: url("img/share_a.png");
+        }
+
+        .collectionItem {
+            background-image: url("img/xin_n.png");
+        }
+
+        .collectionItem.active {
+            background-image: url("img/xin_s.png");
+        }
+
+        .docInfoView {
+            padding: 20px 15px;
+            padding-top: 10px;
+        }
+
+        .docInfo {
+            height: 130px;
+        }
+
+        .docHead {
+            border-radius: 50%;
+        }
+
+        .department {
+            background-color: #FDDFCB;
+            padding: 0px 3px;
+            height: 17px;
+            line-height: 17px;
+        }
+
+        .markLabel {
+            line-height: 18px;
+            height: 20px;
+            padding: 0px 15px;
+            border-radius: 10px;
+            color: #EF5F1E;
+            border: 1px solid #EF5F1E;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            max-width: 90px;
+        }
+
+        .submit {
+            border-radius: 25px;
+        }
+
+        .calendar {
+            height: 180px;
+        }
+
+        .submit {
+            background-color: #F6F6F6;
+        }
+
+        .submit.active {
+            background-color: #EF5F1E !important;
+        }
+
+        .more {
+            background-image: url("img/down_orange.png");
+            padding-right: 15px;
+            background-position: right 2px center;
+            background-size: 10px;
+        }
+
+        .more.active {
+            background-image: url("img/up_orange.png");
+        }
+
+        .more2 {
+            background-image: url("img/down_orange.png");
+            padding-right: 15px;
+            background-position: right 2px center;
+            background-size: 10px;
+        }
+
+        .more2.active {
+            background-image: url("img/up_orange.png");
+        }
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+
+    <header>
+        <div class="navBar">
+            <div class="navBackIcon" onclick="Comm.close()"></div>
+            <div class="navItemIcon collectionItem mr10" onclick="clinitCollection(this);"></div>
+            <div class="navItemIcon shareItem mr10" onclick="shareMessage();"></div>
+            <div class="navTitle">医生详情</div>
+        </div>
+    </header>
+    <!--******************************************************************************-->
+
+    <section class="scroll-y">
+
+
+    </section>
+
+    <!--******************************************************************************-->
+    <footer>
+        <div class="m10 col_white center lh50 f17 submit" onclick="submitClicked(this);">立即预约</div>
+    </footer>
+
+    <script src="js/z.js"></script>
+    <script src="js/g.js"></script>
+    <script src="js/comm.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dict.js"></script>
+    <script src="js/art-template.js"></script>
+    <script src="inc/mescroll/mescroll.min.js"></script>
+    <script src="inc/caculate/SLCaculate.js"></script>
+
+
+    <script>
+        var PageM = {
+            doctorId: Comm.query('did') || '',
+            caculate: null,
+        };
+
+        var apmTime = {
+            am:'',
+            pm:'',
+        }
+
+        var max = 0;
+        var tz = Comm.query('tz');
+
+
+        function pageload() {
+            if (Comm.query('share')) {
+                $('.navBar div').hide();
+                $('footer').html(footCt);
+                Comm.resizeSection();
+            }
+            var opt = {
+                keys: 'APPOINT_WEEK_SHOW'
+            };
+            AJAX.POST('/api/config/bykeys', opt, function (a) { //注册
+                if (a.code == 1) {
+                    max = Number(a.data[0].sysValue);
+                }
+            });
+
+            if (!PageM.doctorId) return;
+            checkIsCollection($('.collectionItem'), PageM.doctorId, 2);
+            getDoctorDetail();
+        }
+
+
+        //获取医生信息
+        function getDoctorDetail() {
+            var params = {
+                doctorid: PageM.doctorId
+            }
+            app.loading($('section'));
+            GDict.init(function () {
+                SLNetwork('get', '/api/doctor/info', params, function (data) {
+                    if (data.code == 1) {
+
+                        var doctor = data.data || {};
+
+                        if (doctor.info && doctor.info.length > 50) {
+                            doctor.hasMore = true;
+                        }
+
+                        if (doctor.introduce && doctor.introduce.length > 50) {
+                            doctor.hasMore2 = true;
+                        }
+
+                        PageM.doctor = doctor;
+
+                        doctor.tags = [];
+                        if (doctor.docspical && doctor.docspical.length) {
+                            doctor.tags = doctor.docspical.split(',')
+                        }
+                        doctor.imgs = [];
+                        if (doctor.license && doctor.license.length) {
+                            doctor.imgs = doctor.license.split(',')
+                        }
+
+                        logText(doctor);
+                        var html = template('tp_id_docDetail', doctor);
+                        $('section').html(html);
+                        getClinicDetail();
+
+                        var curDate = app.formatDate(new Date(), 'Y-m-d');
+                        getCanOrderData(curDate);
+                        showMoreContent();
+                        //用于跳转到页面底部
+                        if (tz) {
+                            $('section').scrollTop(1000000)
+                        }
+                    } else {
+
+                        app.loadFail($('section'), 1);
+                        Comm.message(data.msg);
+                        setTimeout(function () {
+                            Comm.close();
+                        }, 300);
+
+                    }
+                });
+            })
+        }
+
+
+        //获取诊所详情
+        function getClinicDetail() {
+            var params = {
+                clinicid: PageM.doctor.clinicid
+            };
+            SLNetwork('get', '/api/clinic/info', params, function (a) {
+                Comm.loading();
+
+                if (a.code == 1) {
+                    if (a.data && a.data.info && a.data.info.clinicname) {
+                        var name = a.data.info.clinicname;
+                        $('.hospName').text(name);
+
+                        apmTime.am = a.data.info.upworktime.replace(/ /g, "");
+                        apmTime.pm = a.data.info.downworktime.replace(/ /g, "");
+                    }
+                } else {
+
+                }
+            });
+        }
+
+
+
+
+
+
+        //获取医生排班
+        function getCanOrderData(curdate) {
+
+            var params = {
+                doctorid: PageM.doctorId,
+                startdate: curdate, //开始日期
+                day: '7', //获取天数
+            }
+
+            if (!PageM.caculate) {
+                app.loading($('.calendar'));
+            }
+
+            $('.submit').removeClass('bg_trans');
+            PageM.orderModel = null;
+
+            SLNetwork('get', '/api/doctor/appointlist', params, function (data) {
+                if (data.code == 1) {
+                    var appointList = data.data || [];
+                    var list = dealNetData(appointList);
+
+                    if (!PageM.caculate) {
+                        var html = template('tp_id_caculate', {});
+                        $('.calendar').html(html);
+
+                        PageM.caculate = weeklyCalendar(list, {
+                            changeWeek: function (date) {
+                                console.log(date);
+                                var dif = new Date(date).getTime() - new Date().getTime();
+                                if (dif <= 0){
+                                    getCanOrderData(date);
+                                }
+                            },
+                            apm:apmTime,
+
+                            chooseDayTime: function (date, type, wkd) {
+
+
+                                var weeks_ch = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+                                var fullTimeStr = date + '（' + weeks_ch[wkd] + '）' + ((type == 1) ?
+                                    '下午' : '上午');
+
+                                PageM.orderModel = {
+                                    targetdate: date,
+                                    targettype: type,
+                                    doctorid: PageM.doctorId,
+                                    cuspatientid: '',
+                                    weekDay: wkd,
+                                    clinicid: PageM.doctor.clinicid,
+                                    fullTimeStr: fullTimeStr,
+                                }
+
+
+                                if (type == 0) {
+                                    console.log(date + ' 上午');
+                                } else if (type == 1) {
+                                    console.log(date + ' 下午');
+                                }
+                                $('.submit').addClass('bg_trans');
+                            }
+
+                        }, false);
+
+                        if (Comm.query('share')) {
+                            replaceBindClick('section *');
+                        }
+
+
+                    } else {
+                        PageM.caculate.dataArr = list;
+                        PageM.caculate.initWeeklyCalendar();
+                    }
+                } else {
+                    app.loadFail($('.calendar'), 2);
+                    Comm.message(data.msg);
+                }
+            });
+
+        }
+
+        function failReload(tp) {
+            if (tp == 1) {
+                getDoctorDetail();
+            } else if (tp == 2) {
+                var curDate = app.formatDate(new Date(), 'Y-m-d');
+                getCanOrderData(curDate);
+            }
+        }
+
+
+        /*☄↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓（点击事件）↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓☄*/
+
+        //点击收藏按钮
+        function clinitCollection(ele) {
+            if (!PageM.doctorId) return;
+            collectionClicked(ele, PageM.doctorId, 2);
+        }
+
+        function daysBetween(sDate1, sDate2) {
+            //Date.parse() 解析一个日期时间字符串，并返回1970/1/1 午夜距离该日期时间的毫秒数
+            var time1 = Date.parse(new Date(sDate1));
+            var time2 = Date.parse(new Date(sDate2));
+            var nDays = Math.abs(parseInt((time2 - time1) / 1000 / 3600 / 24));
+            return nDays;
+        };
+
+
+        //点击立即预约
+        function submitClicked(o) {
+            if (!app.needLoginCheck(1)) {
+                if ($(o).hasClass('bg_trans') && PageM.orderModel) {
+                    var myDate = new Date;
+                    var year = myDate.getFullYear(); //获取当前年
+                    var mon = myDate.getMonth() + 1; //获取当前月
+                    var date = myDate.getDate(); //获取当前日
+                    var timeStr = year + '-' + mon + '-' + date;
+                    var num = daysBetween(timeStr, PageM.orderModel.targetdate);
+                    if (num > max * 7) {
+                        Comm.message('该诊所当前时间还不可预约，最多预约' + max + '周内');
+                        return;
+                    }
+                    Comm.db('cuspatM', null);
+                    Comm.db('orderM', PageM.orderModel);
+                    Comm.go('appointmentSure.html');
+                } else {
+                    Comm.message('请选择预约日期');
+                }
+            }
+        }
+
+
+
+        //定义一个变量，表示当前的状态（收缩、展开）
+        var onOff = true; // true表示展开
+        var onOff2 = true; // true表示展开
+        function showMoreContent(t, n) {
+            var str = PageM.doctor.info || '';
+            var str2 = PageM.doctor.introduce || '';
+            if (PageM.doctor.hasMore) {
+                if (t) {
+                    $(t).toggleClass('active')
+                }
+                if (n) {
+                    if (n == 1) {
+                        if (onOff) {
+                            $('.info').html(str.substr(0, 50) + "...");
+                            $('.more').text('展开');
+                        } else {
+                            //说明当前状态是收缩的，需要展开
+                            $('.info').html(str);
+                            $('.more').text('收起');
+                        }
+                        onOff = !onOff; //每点击一次，改变一次展开、收缩状态
+                    }
+                    if (n == 2) {
+                        if (onOff2) {
+                            $('.introduce').html(str2.substr(0, 50) + "...");
+                            $('.more2').text('展开');
+                        } else {
+                            //说明当前状态是收缩的，需要展开
+                            $('.introduce').html(str2);
+                            $('.more2').text('收起');
+                        }
+                        onOff2 = !onOff2; //每点击一次，改变一次展开、收缩状态
+                    }
+                } else {
+                    if (onOff && onOff2) {
+                        $('.info').html(str.substr(0, 50) + "...");
+                        $('.introduce').html(str2.substr(0, 50) + "...");
+                        $('.more').text('展开');
+                    } else {
+                        //说明当前状态是收缩的，需要展开
+                        $('.info').html(str);
+                        $('.introduce').html(str2);
+                        $('.more').text('收起');
+                    }
+                    onOff = !onOff; //每点击一次，改变一次展开、收缩状态
+                    onOff2 = !onOff2; //每点击一次，改变一次展开、收缩状态
+                }
+            }
+        }
+
+
+
+
+        //点击分享
+        function shareMessage() {
+
+            if (PageM.doctorId) {
+
+                preventRepeadClickDeal(function () {
+                    Comm.shareUrl({
+                        platform: '',
+                        pic: config.SLShareBase + 'img/appLogoIcon.png', //分享图片路径
+                        title: "古德博士", //分享标题
+                        desc: PageM.doctor.docname, //分享描述
+                        url: config.SLShareBase + 'docDetail.html?share=1&did=' + PageM.doctorId
+                    }, function (d) { //回调
+                        if (d == 1) {
+                            Comm.message("分享成功");
+                        }
+                    });
+                }, 3);
+
+            }
+        }
+
+        /*↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑（点击事件）↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/
+    </script>
+
+
+    <script type="text/html" id="tp_id_docDetail">
+        <!--医生信息-->
+    <div class="docInfoView">
+
+        <div class="docInfo flex flexItem_v flexItem_between bg_theme p15 br5">
+
+            <div class="flex_start">
+                <img width="45" height="45" class="placeImg_Head docHead halfBr mr10" src="{{OSS(dochead,'s')}}"
+                    onerror="app.herrorimg(this);">
+                <div class="col_white" style="width:100%">
+                    <div class="flex_start baseWH">
+                        <div class="name f18 textHide" style="width:40%;">{{docname||''}}</div>
+                        {{each tags tid i}}
+                        {{if getTag(tid)}}<div class="department f11 lh15 col_theme br3 ml5 textHide" style="max-width:60px;">{{getTag(tid)}}</div>{{/if}}
+                        {{/each}}
+                    </div>
+
+                    <div class="hospName f12 baseWH mt5 textHide" style="width:60%;"></div>
+                </div>
+            </div>
+
+            <div class="flex_around col_white">
+
+                <div class="center">
+                    <div class="f18 baseWH">{{avgvalue||0}}</div>
+                    <div class="f12">总体评分</div>
+                </div>
+
+                <div class="center">
+                    <div class="f18 baseWH">{{servercount||0}}</div>
+                    <div class="f12">总接诊量</div>
+                </div>
+
+                <div class="center">
+                    <div class="f18 baseWH">{{appointcount||0}}</div>
+                    <div class="f12">总预约量</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!--医生介绍-->
+    <div>
+        <div class="p15 f16 bold">医生介绍</div>
+        <div class="p15 pt0">
+            <div class="labels flex_wrap">
+                {{each tags tid i}}
+                {{if getTag(tid)}}<div class="markLabel textHide">{{getTag(tid)}}</div>{{/if}}
+                {{/each}}
+
+            </div>
+
+            <div class="description col_sub999 f12 mart15 baseWH"><span
+                    class="info">{{info||''}}</span>{{if hasMore}}<span class="rIcon more col_theme f12"
+                    onclick="showMoreContent(this,1);">展开</span>{{/if}}</div>
+
+        </div>
+    </div>
+
+    <!--从业经历-->
+    <div>
+        <div class="p15 f16 bold">从业经历</div>
+        <div class="p15 pt0">
+            <div class="description col_sub999 f12 mart15 baseWH"><span
+                    class="introduce">{{introduce||''}}</span>{{if hasMore2}}<span class="rIcon more2 col_theme f12"
+                    onclick="showMoreContent(this,2);">展开</span>{{/if}}</div>
+
+        </div>
+    </div>
+
+    <!--从业执照-->
+
+    <div>
+        <div class="p15 f16 bold">从业执照</div>
+
+        <div class="mainW ohide">
+            <div class="picts scroll-x p15 pt0 flex mainW">
+
+                {{each imgs imgUrl i}}
+                <div class="marr20">
+                    <img height="90" width="125" style="object-fit: contain;" src="{{OSS(imgUrl,'s')}}" onerror="app.errorimg(this);">
+                </div>
+                {{/each}}
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--医生排班-->
+    <div>
+        <div class="p15 f16 bold">医生排班</div>
+
+        <div class="mainW calendar bg_place border">
+
+        </div>
+
+
+        <div class="col_sub999 f12 p15">
+            预约规则：预约后到诊时间的2小时前可取消，若迟到讲移后至预
+            约时间最后一位看诊。
+        </div>
+
+    </div>
+    <div id="calender"></div>
+
+    </script>
+
+
+    <script type="text/html" id="tp_id_caculate">
+        <div class="week_content bg_lgray">
+            <div class="week_title flex_between bg_lgray" id="id_week_title" ids="0">
+                <a href="javascript:void(0)" id="prevWeek" class="prevWeek pl15">上页</a>
+                <div id="showDate"></div>
+                <a href="javascript:void(0)" id="nextWeek" class="nextWeek pr15">下页</a>
+            </div>
+
+            <div class="m1 f10">
+                <!--周日至周六-->
+                <div class="week_box">
+                    <ul class="flex_around f10" id="weekUl"></ul>
+                </div>
+
+                <!--日历排班-->
+                <div class="calendar_box flex_around f10" id="calendarBox"></div>
+            </div>
+        </div>
+    </script>
+
+
+</body>
+
+</html>

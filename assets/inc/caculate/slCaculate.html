@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>周日历</title>
+
+</head>
+
+<link rel="stylesheet" href="SLCaculate.css">
+<link rel="stylesheet" href="../../css/comm.css">
+
+
+<body>
+<div class="week_content bg_lgray">
+    <div class="week_title flex_between bg_lgray" id="id_week_title" ids="0">
+        <a href="javascript:void(0)" id="prevWeek" class="prevWeek pl15">上页</a>
+        <div id="showDate"></div>
+        <a href="javascript:void(0)" id="nextWeek" class="nextWeek pr15">下页</a>
+    </div>
+
+    <div class="m1">
+        <!--周日至周六-->
+        <div class="week_box">
+            <ul class="flex_around" id="weekUl"></ul>
+        </div>
+
+        <!--日历排班-->
+        <div class="calendar_box flex_around" id="calendarBox"></div>
+    </div>
+</div>
+
+
+<script src="../../js/z.js"></script>
+<script src="../../js/g.js"></script>
+
+<script src="SLCaculate.js"></script>
+
+
+<script>
+
+    var netData = [
+        {
+            "appnum": 0, "daytype": 0, "day": "2019-08-24", "status": 1
+        }, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-24",
+            "status": 1
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-25", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-25",
+            "status": 0
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-26", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-26",
+            "status": 0
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-27", "status": 0}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-27",
+            "status": 0
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-28", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-28",
+            "status": 1
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-29", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-29",
+            "status": 1
+        }, {"appnum": 0, "daytype": 0, "day": "2019-08-30", "status": 0}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-30",
+            "status": 1
+        }, {
+            "appnum": 0, "daytype": 0, "day": "2019-08-31", "status": 1
+        }, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-08-31",
+            "status": 1
+        }, {"appnum": 0, "daytype": 0, "day": "2019-09-01", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-09-01",
+            "status": 0
+        }, {"appnum": 0, "daytype": 0, "day": "2019-09-02", "status": 1}, {
+            "appnum": 0,
+            "daytype": 1,
+            "day": "2019-09-02",
+            "status": 0
+        }];
+
+
+    netData = dealNetData(netData);
+
+    function dealNetData(dataArr){
+
+        var newList = [];
+        var tempDict = {};
+        dataArr.forEach(function (ele,idx) {
+            var index = parseInt(idx / 2);
+            var indCount = idx % 2;
+            if (indCount == 0){
+                tempDict = {
+                    date:ele.day,
+                    items:[]
+                };
+            }
+            tempDict.items.push(ele);
+            if (indCount == 1){
+                newList.push(tempDict);
+            }
+            console.log(index + '__' + indCount);
+        });
+
+        console.log(newList);
+        return newList;
+    }
+
+
+</script>
+
+
+<script type="text/javascript">
+    var aa;
+
+    var type = Comm.query('t');
+    aa = weeklyCalendar(netData, {
+        changeWeek: function (date) {
+            console.log(date);
+        }
+    }, false);
+
+
+
+</script>
+
+
+</body>
+</html>
+

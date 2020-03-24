@@ -1,0 +1,209 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>病例详情</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+
+        .patientInfo {
+            padding: 15px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+        }
+
+        .backGround {
+            background: url("img/bg_case.png") no-repeat center center;
+            background-size: 100% 100%;
+            padding: 10px 15px;
+        }
+
+        .backGround div {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .col_sub {
+            color: #666666;
+        }
+
+
+    </style>
+
+</head>
+
+
+<!--******************************************************************************-->
+<body>
+
+<header>
+    <div class="navBar bottomShadow bottomBorder">
+        <div class="navBackIcon" onclick="androidback()"></div>
+        <div class="navTitle">病例详情</div>
+    </div>
+</header>
+<!--******************************************************************************-->
+
+<section>
+
+</section>
+
+<!--******************************************************************************-->
+<footer></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dict.js"></script>
+<script src="js/art-template.js"></script>
+
+<script>
+
+    var oid = Comm.query('oid');
+
+    function androidback() {
+        Comm.close();
+    }
+
+    function pageresume() {
+
+    }
+
+    function pageload() {
+        if (oid) {
+
+            var opt = {
+                keys: 'CLOSE_ORDERINFO'
+            };
+            AJAX.POST('/api/config/bykeys', opt, function (a) { //注册
+                var show = false;
+                if (a.code == 1) {
+                    show = Number(a.data[0].sysValue);
+                }
+                GDict.init(function () {
+                    getCaseDetail(show);
+                })
+            });
+
+
+        }
+    }
+
+    function getCaseDetail(show) {
+        var params = {
+            ordersid: oid
+        }
+
+        var loadEle = $('section');
+        app.loading(loadEle);
+
+        SLNetwork('get', '/api/orders/info', params, function (data) {
+            if (data.code == 1) {
+                var model = data.data || {goodList: [], orders: []};
+                model.show = show;
+
+                var html = template('tp_id_detail', model);
+                loadEle.html(html);
+            } else {
+                Comm.message(data.msg);
+                app.loadFail(loadEle);
+            }
+        });
+    }
+
+    function failReload() {
+        getCaseDetail();
+    }
+
+</script>
+
+
+<script type="text/html" id="tp_id_detail">
+
+    <div class="patientInfo">
+
+        <div class="backGround">
+            <div>就诊卡号：{{orders.cuspatientid||''}}</div>
+            <div>就诊人：{{orders.name||''}}</div>
+            <div>诊 所：{{orders.clinicname||''}}</div>
+            <div>医 生：{{orders.docname||''}}</div>
+            <div>时 间：{{formatDate(orders.subdate,'Y-m-d H:i')}}</div>
+        </div>
+
+    </div>
+
+
+    <div class="p15">
+        <div class="p15 shadow br5">
+            <div class="listSection">
+                <div class="bold f16">诊断信息：</div>
+                <div class="col_sub mart15 f12 baseWH">
+                    {{orders.checkresult||orders.symptom||'无'}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="p15">
+        <div class="p15 shadow br5">
+            <div class="listSection">
+                <div class="bold f16">医嘱：</div>
+                <div class="col_sub mart15 f12">
+
+                    {{orders.remark||'无'}}
+                    <!--建议不要干重体力劳动和剧烈运动。不要睡弹簧床垫，一定-->
+                    <!--要避免长期保持一个姿势工作和学习，尤其是长期弯腰工作-->
+                    <!--学习，每1小时左右要休息10分钟左右。可以牵引，理疗，-->
+                    <!--红外线，推拿按摩治疗。推拿按摩治疗推拿按摩治-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="p15 {{if show}}}''{{else}}{{'hide'}}{{/if}}">
+        <div class="p15 shadow br5">
+            <div class="listSection">
+                <div class="bold f16">处方信息：</div>
+                <div class="col_sub mart15 f12">
+
+                    {{each goodList deal i}}
+                    {{deal.goodsname}}
+
+                    {{if deal.ratedict}}
+                    ：{{getTag(deal.ratedict)}}
+                    {{/if}}
+
+                    {{if deal.onecost}}
+                    每次{{deal.onecost||''}}
+                    {{/if}}
+
+                    ({{getTag(deal.usewaydict||'')}})
+
+                    {{if deal.remark}}
+                    (备注:{{deal.remark}})
+                    {{/if}}
+
+                    <br>
+                    {{/each}}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+
+    <title>我的</title>
+
+    <link rel="stylesheet" href="css/g.css">
+    <link rel="stylesheet" href="css/comm.css">
+
+    <style>
+        /*头部*/
+        .background {
+            background: url("img/center_background.png") no-repeat center center;
+            background-size: 100% 100%;
+        }
+
+        .navBar {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        .headIcon {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+
+            margin-left: 15px;
+            margin-right: 20px;
+        }
+
+        .lIcon.phone {
+            background-image: url("img/phone_w.png");
+        }
+
+        .iden {
+            background-image: url("stIconfile/identi_w.png");
+            background-size: 8px auto;
+            background-position: center right 15px;
+        }
+
+        .navBar {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        .rIcon {
+            background-size: 6px auto;
+        }
+
+        .topVHeigh {
+            height: 110px;
+        }
+
+        .centerCell {
+            line-height: 60px;
+            font-size: 16px;
+        }
+
+        .icon {
+            background: url("img/center_1.png") center center no-repeat;
+            background-size: auto 20px;
+            margin-right: 10px;
+            overflow: hidden;
+            height: 20px;
+            width: 25px;
+        }
+
+        .icon.icon1 {
+            background-image: url("img/center_1.png");
+        }
+
+        .icon2 {
+            background-image: url("img/center_2.png");
+        }
+
+        .icon3 {
+            background-image: url("img/center_3.png");
+        }
+
+        .icon4 {
+            background-image: url("img/center_4.png");
+        }
+
+        .icon5 {
+            background-image: url("img/center_5.png");
+        }
+
+        .icon6 {
+            background-image: url("img/center_6.png");
+        }
+
+        .indicator {
+            background-image: url("stIconfile/identi_g.png");
+            background-position: right center;
+        }
+
+        /*.hasLogin,.active .notLogin{*/
+        /*display: none;*/
+        /*}*/
+        /*.notLogin,.active .hasLogin{*/
+        /*display: block;*/
+        /*}*/
+
+
+    </style>
+
+</head>
+
+<!--******************************************************************************-->
+
+<body>
+<!--******************************************************************************-->
+
+<section class="scroll-y">
+
+    <div class="background col_white">
+        <header>
+            <div class="navBar topHeader iosDeal">
+                <div class="navTitle"></div>
+            </div>
+        </header>
+
+
+        <div class="flex_between topVHeigh paddb20" onclick="showUserInfo()">
+            <div class="imgContain headIcon">
+                <img class="placeImg_Head_not hIcon" onerror="app.hUerrorimg(this)"/>
+            </div>
+
+            <div class="flex1 infoText tleft">
+
+
+            </div>
+            <div class="rIcon iden baseWH"></div>
+        </div>
+
+
+    </div>
+
+
+    <div class="p20">
+
+        <div class="flex_start centerCell indicator" onclick="optionClicked(1)">
+            <div class="baseWH icon icon1"></div>
+            <div class="cellText">我的病例</div>
+        </div>
+
+        <div class="flex_start centerCell indicator" onclick="optionClicked(2)">
+            <div class="baseWH icon icon2"></div>
+            <div class="cellText">就诊人</div>
+        </div>
+
+        <div class="flex_start centerCell indicator" onclick="optionClicked(3);">
+            <div class="baseWH icon icon3"></div>
+            <div class="cellText">收藏</div>
+        </div>
+
+        <div class="flex_start centerCell indicator" onclick="optionClicked(4);">
+            <div class="baseWH icon icon4"></div>
+            <div class="cellText">联系客服</div>
+        </div>
+
+        <div class="flex_start centerCell indicator" onclick="optionClicked(5);">
+            <div class="baseWH icon icon5"></div>
+            <div class="cellText">消息</div>
+        </div>
+
+        <div class="flex_start centerCell indicator" onclick="Comm.go('setting.html')">
+            <div class="baseWH icon icon6"></div>
+            <div class="cellText">设置</div>
+        </div>
+
+    </div>
+
+
+</section>
+
+<!--***********************************************placeImg_Head_not hIcon*******************************-->
+<footer class="shared"></footer>
+
+<script src="js/z.js"></script>
+<script src="js/g.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/api.js"></script>
+<script src="js/art-template.js"></script>
+
+
+<script>
+
+    var PageM = {
+        userinfo: app.getUserinfo(),
+    }
+
+    Foot.init();
+
+
+    function pageload() {
+        contactPTKF(true);
+        getUserinfo();
+    }
+
+
+    function pageresume() {
+        getUserinfo();
+    }
+
+
+    //获取用户信息
+    function getUserinfo() {
+        if (app.isLogin()) {
+            SLNetwork('get', '/api/customer/show', {}, function (a) {
+                if (a.code == 1) {
+                    app.saveUserinfo(a.data);
+                    PageM.userinfo = app.getUserinfo();
+                    $('.hIcon').attr('src', Comm.OSS.getImgUrl(PageM.userinfo.head, 's'));
+                    var html = template('tp_id_userinfo', PageM);
+                    $('.infoText').html(html);
+                } else {
+                    Comm.message(data.msg);
+                }
+            });
+        } else {
+            app.clearUserData();
+            PageM.userinfo = app.getUserinfo();
+            $('.hIcon').attr('src', 'stIconfile/head_notlogin.png')
+            var html = template('tp_id_userinfo', PageM);
+            $('.infoText').html(html);
+        }
+    }
+
+
+    function showUserInfo() {
+        if (app.isLogin()) {
+            Comm.go('userinfo.html')
+        }
+    }
+
+
+    function optionClicked(index) {
+
+        if (app.needLoginCheck(true)){
+            return;
+        }
+
+        switch (index) {
+            case 1 :
+                Comm.go('caseList.html');
+                break;
+            case 2 :
+                Comm.go('patientList.html');
+                break;
+            case 3 :
+                Comm.go('favorite.html');
+                break;
+            case 4 :
+                contactPTKF();
+                break;
+            case 5 :
+                Comm.go('msg.html');
+                break
+
+            default :
+                break;
+        }
+    }
+
+    function contactPTKF(dontSend) {
+        preventRepeadClickDeal(function () {
+
+            if (!PageM.kfTel) {
+                app.getSys('SERVICE_PHONE', function (data) {
+
+                    var configs = data.data||[];
+                    if (configs.length){
+                        var tel = configs[0].sysValue;
+                        if (!PageM.kfTel) {
+                            PageM.kfTel = tel;
+                            if (dontSend) return;
+                            Comm.openUrlStr('tel:' + PageM.kfTel);
+                        }
+                    }
+                })
+            } else {
+                Comm.openUrlStr('tel:' + PageM.kfTel);
+            }
+
+        }, 1000)
+    }
+
+
+</script>
+
+
+<script type="text/html" id="tp_id_userinfo">
+
+    {{if userinfo}}
+    <div class="hasLogin">
+        <div id="nickName" class="f16 baseWH mb5 bold TBreak wordW autoTextW">{{userinfo.nickname||''}}</div>
+        <div class="f12 baseWH lIcon phone lh20">+86 <span id="phone">{{sphone(userinfo.phone||'')}}</span></div>
+    </div>
+
+    {{else}}
+    <div class="f16 bold notLogin" onclick="Comm.goLogin();">
+        登录/注册
+    </div>
+    {{/if}}
+
+</script>
+
+
+</body>
+
+</html>

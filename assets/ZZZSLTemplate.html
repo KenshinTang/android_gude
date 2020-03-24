@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>就诊人</title>
+    <meta content="width=device-width,initial-scale=1.0,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no,email=no,adress=no"/>
+    <link href="css/g.css" type="text/css" rel="stylesheet">
+    <link href="css/comm.css" type="text/css" rel="stylesheet">
+    <style>
+        .indicator{
+            background-image: url("stIconfile/identi.png");
+        }
+
+        .boldb {
+            border-bottom: 1px solid #eee;
+            line-height: 50px;
+            width: 100%;
+        }
+
+        .boldb span {
+            width: 100px;
+            display: inline-block;
+        }
+
+        .boldb img,
+        .boldb span {
+            vertical-align: middle;
+        }
+
+        .boldb input {
+            text-align: left;
+            font-size: 15px;
+            height: 30px;
+            width: 65%;
+        }
+
+        .boldb input[type=button] {
+            color: #CCCCCC;
+            background-color: white;
+            margin-right: 15px;
+            margin-top: 10px;
+            float: right;
+        }
+
+        .editIcon{
+            display: none;
+        }
+
+
+        .sureBtn {
+            width: 90%;
+            margin: 5px auto;
+            font-size: 16px;
+            text-align: center;
+            height: 45px;
+            line-height: 45px;
+            border-radius: 23px;
+            color: white;
+        }
+
+        body > footer {
+            z-index: 90;
+        }
+
+        html{
+            border: 5px solid green;
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="navBar bottomBorder">
+        <div class="navBackIcon" onclick="Comm.close()"></div>
+        <div class="navItem f16 mr10 editIcon col_theme" onclick="deleteCellRecord()">删除</div>
+        <div class="navTitle"></div>
+    </div>
+</header>
+<section class="bg_lgray scroll-y">
+
+    <div class="bg_white formCt">
+
+    </div>
+
+</section>
+
+<footer>
+    <div class="sureBtn col_white bg_disable" onclick="savePatientInfo();">保存</div>
+</footer>
+
+</body>
+
+<script src="js/g.js"></script>
+<script src="js/z.js"></script>
+<script src="js/comm.js"></script>
+<script src="js/area.js"></script>
+<script src="js/picker.min.js"></script>
+<script src="js/art-template.js"></script>
+<script src="js/api.js"></script>
+
+<script type="text/javascript">
+
+    var tid = Comm.query('tid') || '';
+    var userinfo = Comm.db("userinfo"),requestParms = {};
+    var PageM = {
+        datePicker: null,
+        genderPicker: null,
+    }
+
+    function pageload() {
+        var test = Comm.query('test');
+        if (test){
+            var times = new Date().getTime();
+            location.href = 'zzzztest.html?t='+times;
+            return;
+        }
+        initUI();
+        initPicker();
+    }
+
+    function initUI() {
+        $('.navTitle').text('添加就诊人');
+        $('.formCt').html(template('tp_id',{}));
+        $('.sureBtn').addClass('bg_theme');
+    }
+
+    function initPicker() {}
+
+    function savePatientInfo() {
+        var times = new Date().getTime();
+        var pageurl = 'zzzztest.html?t='+times;
+        Comm.alert(pageurl,function () {
+            Comm.go(pageurl);
+        });
+
+    }
+
+    function getPaintentDetail() {}
+    function deleteCellRecord() {}
+
+    $('.navBar').on('scroll',function (a,b,c) {
+        var ss = $('.navBar').scrollTop();
+    })
+
+
+
+
+
+</script>
+
+
+<script type="text/html" id="tp_id">
+
+    <div class="marl20">
+        <div class="boldb">
+            <span class="f16">姓名</span>
+            <input type="text" id="name" value="{{paname||''}}" placeholder="请输入收件人姓名"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">手机号</span>
+            <input type="tel" id="phone" maxlength="11" value="{{paphone||''}}" placeholder="请输入收件人手机号"/>
+        </div>
+
+        <div class="boldb indicator" onclick="PageM.genderPicker.show();">
+            <span class="f16">性别</span>
+            <input type="text" id="gender" value="{{getGender(pasex)||''}}" gender="{{pasex}}" placeholder="请选择性别" readonly/>
+        </div>
+
+        <div class="boldb indicator" onclick="PageM.datePicker.show();">
+            <span class="f16">年龄</span>
+            <input type="text" id="age" value="{{paage||''}}" placeholder="请选择年龄" readonly/>
+        </div>
+
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" id="idcard" value="{{paidcard||''}}" placeholder="请输入身份证"/>
+        </div>
+
+        {{if cuspatientid}}
+        <div class="boldb">
+            <span class="f16">就诊号</span>
+            <input type="text" id="number" value="{{cuspatientid||''}}" placeholder="请输入就诊号" readonly/>
+        </div>
+        {{/if}}
+
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+        <div class="boldb">
+            <span class="f16">身份证</span>
+            <input type="text" value="" placeholder="请输入"/>
+        </div>
+
+    </div>
+
+</script>
+
+
+</html>
