@@ -1,20 +1,29 @@
 package com.yunlinker.gdbs;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+
+import com.hjq.permissions.OnPermission;
+import com.hjq.permissions.XXPermissions;
 import com.qiyukf.unicorn.api.ConsultSource;
 import com.qiyukf.unicorn.api.ProductDetail;
 import com.qiyukf.unicorn.api.Unicorn;
@@ -41,6 +50,7 @@ import com.yunlinker.model.onVideoModel;
 import com.yunlinker.myApp;
 import com.yunlinker.pay.OnlinePay;
 import com.yunlinker.util.DonwloadSaveImg;
+import com.yunlinker.util.PermissionManager;
 import com.yunlinker.util.PermissionUtil;
 
 import org.json.JSONException;
@@ -52,11 +62,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
 
 import static com.yunlinker.auth.WebPermissionManager.StoragePermissions;
+import static com.yunlinker.config.WebConfig.GPS_REQUEST_CODE;
 import static com.yunlinker.config.WebConfig.saveKey;
 
 //import com.yunlinker.image.ImageTool;
@@ -183,20 +195,62 @@ public class JSInspect extends BaseInspect {
 
     //获取位置信息
     @JavascriptInterface
-    public void position(String code) {
+    public synchronized void position(String code) {
+        Log.d("kenshin", "11111111111 position");
         mweb.setInsCode("position",code);
-        WebPermissionManager.getInstance(mactivity).CheckPermission(WebPermissionManager.LocationPermissions, new WebPermissionManager.OnPermissionBack() {
-            @Override
-            public void success() {
-                Location.getInstance().position(mactivity, mweb);
-            }
+        if (!XXPermissions.isHasPermission(mactivity, PermissionManager.PERMISSION_LOCATION)) {
+            XXPermissions.with(mactivity)
+                    .permission(PermissionManager.PERMISSION_LOCATION)
+                    .request(new OnPermission() {
+                        @Override
+                        public void hasPermission(List<String> granted, boolean all) {
+                            if (all) {
+                                Location.getInstance().position(mactivity, mweb);
+                            } else {
+                                // do nothing.
+                            }
+                        }
 
-            @Override
-            public void error() {
-                mweb.setValue("position", "{\"code\":0}");
-                Toast.makeText(mactivity,"授权失败，请设置权限后重试",Toast.LENGTH_SHORT).show();
-            }
-        });
+                        @Override
+                        public void noPermission(List<String> denied, boolean quick) {
+                            if (quick) {
+                                // 永久拒绝, 跳
+                                new AlertDialog.Builder(mactivity)
+                                        .setTitle("提示")
+                                        .setMessage("当前应用需要使用位置权限.")
+                                        .setNegativeButton("取消", null)
+                                        .setPositiveButton("前往设置",
+                                                new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        XXPermissions.gotoPermissionSettings(mactivity);
+                                                    }
+                                                })
+                                        .setCancelable(false)
+                                        .show();
+
+                            } else {
+                                // 被拒绝
+                                mweb.setValue("position", "{\"code\":1}");
+                            }
+                        }
+                    });
+        } else {
+            Location.getInstance().position(mactivity, mweb);
+        }
+//        mweb.setInsCode("position",code);
+//        WebPermissionManager.getInstance(mactivity).CheckPermission(WebPermissionManager.LocationPermissions, new WebPermissionManager.OnPermissionBack() {
+//            @Override
+//            public void success() {
+//                Location.getInstance().position(mactivity, mweb);
+//            }
+//
+//            @Override
+//            public void error() {
+//                mweb.setValue("position", "{\"code\":0}");
+//                Toast.makeText(mactivity,"授权失败，请设置权限后重试",Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     //分享

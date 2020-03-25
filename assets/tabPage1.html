@@ -231,6 +231,7 @@
         };
 
     function pageload() {
+        console.log('js tab1 kenshin pageload');
         getPosition();
         getBannerInfo();
         getInfoList();
@@ -287,6 +288,7 @@
 
 
     function pageresume() {
+        console.log('js kenshin tab1 pageresume');
         if (!app.isLogin()) {
             app.clearUserData();
         }
@@ -295,7 +297,7 @@
 
 
     function getPosition(cb) {
-
+        console.log('js tab1 kenshin getPosition');
 
         var aaa = Comm.db('showArea');
         Comm.db('showArea', null);

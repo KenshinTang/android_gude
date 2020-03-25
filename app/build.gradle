@@ -3,13 +3,13 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         debug {
-            storeFile file('G:\\Source\\ionic\\android_gude\\Yunlinker-20160516.jks')
+            storeFile file('E:\\Src\\outSource\\miraiku\\Yunlinker-20160516.jks')
             storePassword '20160516'
             keyAlias = 'yunlinker'
             keyPassword '20160516'
         }
         release {
-            storeFile file('G:\\Source\\ionic\\android_gude\\Yunlinker-20160516.jks')
+            storeFile file('E:\\Src\\outSource\\miraiku\\Yunlinker-20160516.jks')
             storePassword '20160516'
             keyAlias = 'yunlinker'
             keyPassword '20160516'
@@ -36,6 +36,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -103,4 +104,5 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.1.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'org.xutils:xutils:3.5.3'
+    implementation 'com.hjq:xxpermissions:6.2'
 }
