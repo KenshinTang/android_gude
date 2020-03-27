@@ -27,7 +27,7 @@ public class WebConfig {
     public static final int SELECTED_IMAGE_CODE = 2000;
     public static final int QRCODE_GET_CODE = 2001;
     public static final int UMSHARE_CALLBACK_CODE = 10103;
-    public static final int GPS_REQUEST_CODE = 191091;
+    public static final int GPS_REQUEST_CODE = 101;
     public static final int REQ_PIC = 1000;
     public static final int REQ_CROP = 1001;
 

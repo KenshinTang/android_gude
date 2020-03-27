@@ -68,7 +68,9 @@ public class WebPermissionManager {
         OnPermissionBack b = codeMap.get(String.valueOf(requestCode));
         for(int p:grantResults) {
             if(p != PackageManager.PERMISSION_GRANTED) {
-                b.error();
+                if (b != null) {
+                    b.error();
+                }
                 return;
             }
         }

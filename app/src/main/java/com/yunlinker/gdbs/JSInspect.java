@@ -198,43 +198,29 @@ public class JSInspect extends BaseInspect {
     public synchronized void position(String code) {
         Log.d("kenshin", "11111111111 position");
         mweb.setInsCode("position",code);
-        if (!XXPermissions.isHasPermission(mactivity, PermissionManager.PERMISSION_LOCATION)) {
-            XXPermissions.with(mactivity)
-                    .permission(PermissionManager.PERMISSION_LOCATION)
-                    .request(new OnPermission() {
-                        @Override
-                        public void hasPermission(List<String> granted, boolean all) {
-                            if (all) {
-                                Location.getInstance().position(mactivity, mweb);
-                            } else {
-                                // do nothing.
-                            }
-                        }
-
-                        @Override
-                        public void noPermission(List<String> denied, boolean quick) {
-                            if (quick) {
-                                // 永久拒绝, 跳
-                                new AlertDialog.Builder(mactivity)
-                                        .setTitle("提示")
-                                        .setMessage("当前应用需要使用位置权限.")
-                                        .setNegativeButton("取消", null)
-                                        .setPositiveButton("前往设置",
-                                                new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        XXPermissions.gotoPermissionSettings(mactivity);
-                                                    }
-                                                })
-                                        .setCancelable(false)
-                                        .show();
-
-                            } else {
-                                // 被拒绝
-                                mweb.setValue("position", "{\"code\":1}");
-                            }
-                        }
-                    });
+        if (ActivityCompat.checkSelfPermission(mactivity, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(mactivity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                ActivityCompat.requestPermissions(mactivity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+            } else {
+                if (!HomeActivity.firstRequestFinish) {
+                    return;
+                }
+                // 永久拒绝
+                new AlertDialog.Builder(mactivity)
+                        .setTitle("提示")
+                        .setMessage("当前应用需要使用位置权限.")
+                        .setNegativeButton("取消", null)
+                        .setPositiveButton("前往设置",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        XXPermissions.gotoPermissionSettings(mactivity);
+                                    }
+                                })
+                        .setCancelable(false)
+                        .show();
+            }
         } else {
             Location.getInstance().position(mactivity, mweb);
         }
