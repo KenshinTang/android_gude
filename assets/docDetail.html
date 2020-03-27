@@ -273,7 +273,8 @@
             SLNetwork('get', '/api/doctor/appointlist', params, function (data) {
                 if (data.code == 1) {
                     var appointList = data.data || [];
-                    var list = dealNetData(appointList);
+
+                    var list = dealNetData(appointList,apmTime);
 
                     if (!PageM.caculate) {
                         var html = template('tp_id_caculate', {});

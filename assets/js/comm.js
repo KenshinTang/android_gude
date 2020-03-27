@@ -1638,20 +1638,97 @@ function checkIsCollection(ele, itemId, itemtype) {
 }
 
 
+function nowTimeOut(d2) {
+    var dateEnd = new Date(d2.replace(/-/g, "/"));//将-转化为/，使用new Date
+    var dateNow = new Date();//获取当前时间
+
+    var endDiff = dateEnd.getTime() - dateNow.getTime();//时间差的毫秒数
+
+    if (endDiff > 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+function nowInDateBetwen(d1, d2, date) {
+    //如果时间格式是正确的，那下面这一步转化时间格式就可以不用了
+    var dateBegin = new Date(d1.replace(/-/g, "/"));//将-转化为/，使用new Date
+    var dateEnd = new Date(d2.replace(/-/g, "/"));//将-转化为/，使用new Date
+    // var dateNow = new Date(date.replace(/-/g, "/"));//将-转化为/，使用new Date
+    //var dateBegin = new Date(d1);//将-转化为/，使用new Date
+    //var dateEnd = new Date(d2);//将-转化为/，使用new Date
+    var dateNow = new Date();//获取当前时间
+
+    var beginDiff = dateNow.getTime() - dateBegin.getTime();//时间差的毫秒数
+    var beginDayDiff = Math.floor(beginDiff / (24 * 3600 * 1000));//计算出相差天数
+
+    var endDiff = dateEnd.getTime() - dateNow.getTime();//时间差的毫秒数
+    var endDayDiff = Math.floor(endDiff / (24 * 3600 * 1000));//计算出相差天数
+
+    if (endDayDiff < 0) {//已过期
+        return false
+    }
+    if (beginDayDiff < 0) {//没到开始时间
+        return false;
+    }
+    if (endDayDiff == 0) {
+        return true
+    }
+    if (beginDayDiff == 0) {
+        return true;
+    }
+    return true;
+}
+
+
+
 //处理可预约时间表数据
-function dealNetData(dataArr) {
+function dealNetData(dataArr,time_apm) {
+
 
     var newList = [];
     var tempDict = {};
     dataArr.forEach(function (ele, idx) {
         var index = parseInt(idx / 2);
         var indCount = idx % 2;
+
+        var timePre = app.formatDate(new Date()) + ' ';
+
+
         if (indCount == 0) {
             tempDict = {
                 date: ele.day,
                 items: []
             };
+
+            var amTimeArr = time_apm.am.split('-');
+            var am_first = timePre +  amTimeArr[0];
+            var am_second = timePre + amTimeArr[1];
+
+            if (nowTimeOut(am_second)){
+                ele.notInTime = true;
+            }
+
+        } else {
+            var pmTimeArr = time_apm.pm.split('-');
+            var pm_first = timePre + pmTimeArr[0];
+            var pm_second = timePre + pmTimeArr[1];
+            if (nowTimeOut(pm_second)){
+                ele.notInTime = true;
+            }
         }
+
+
+
+
+
+
+
+
+
+
         tempDict.items.push(ele);
         if (indCount == 1) {
             newList.push(tempDict);

@@ -123,6 +123,7 @@ function weeklyCalendar(dataArr, options, showData) {
 
             var skip = false;
 
+
             $.each(that.dataArr, function (ind, ele) {
 
                 var show_date = ele.date.split('-');
@@ -134,7 +135,9 @@ function weeklyCalendar(dataArr, options, showData) {
                         // debugger
                         //status 0 不能约  1 可以约  2已满
                         //是否可预约
-                        if (_ele.status == 0 || (currentNYR == _ele.day && currentAPM == 1 && _index == 0)){
+
+
+                        if (_ele.status == 0 || (currentNYR == _ele.day && _ele.notInTime)){
                             optionsHtml += '<li class="flex_center bg_white">'
                                 + '<p>' + '' + '</p>';
                         } else if (_ele.status == 1){

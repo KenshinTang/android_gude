@@ -226,6 +226,11 @@
             /*filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFA044, endColorstr=#EF5F1E, GradientType=0);*/
         }
 
+
+        .maskInfoCt img{
+            width: 100%;
+        }
+
     </style>
 
 </head>
@@ -358,6 +363,7 @@
                         });
                     }
 
+
                     $('.detailContent').html(template('tp_id_cliDetail', dataModel));
                     getEvaluationList();
                     initSwiper();
@@ -385,6 +391,7 @@
 
 
         function getEvaluationList() {
+            // return;
 
             if (!merefresh) {
 
@@ -395,6 +402,10 @@
                 merefresh.refreshOption.refreshParm = {
                     clinicid: PageM.clinicid,
                 };
+                // merefresh.refreshOption.
+                merefresh.refreshOption.needHeadRefresh = false;
+                merefresh.refreshOption.needFootRefresh = true;
+                merefresh.refreshOption.notDeal = true;
 
 
                 //页面 <刷新> 的回调
@@ -422,6 +433,12 @@
                 };
 
                 merefresh.configurationDone('refreshId0', 'list0');
+
+
+                clickList('#refreshId0',' *',function (a,c) {
+
+                });
+
             } else {
 
             }
@@ -490,7 +507,14 @@
             $(".clinicInfo").css('bottom', 0 - bt);
             $(".clinicInfo").height(h);
 
-            $(".maskInfoCt").height(bt - 40);
+            $(".maskInfoCt").height(bt - 40 - 20);
+
+
+            $('.maskInfoCt').scroll(function (a,b,c) {
+                console.log(this.scrollTop);
+                event.stopPropagation();
+            })
+
         }
 
 
@@ -566,7 +590,7 @@
 
             <div class="clinicInfo br5 center shadow">
 
-                <div style="min-height: 70px;">
+                <div style="min-height: 70px; margin-bottom: 20px;">
                     <div class="f16 bold baseWH textHide">{{info.clinicname||''}}</div>
 
                     <div class="rcm_tag flex_center lh15 mt5 mb5">
@@ -592,7 +616,7 @@
                 </div>
                 <div></div>
 
-                <div class="maskInfoCt scroll-y tleft">
+                <div class="maskInfoCt scroll-y tleft mescroll-touch-y">
 
                     <div>
                         <div class="bold infoTT f16">医疗类型</div>
